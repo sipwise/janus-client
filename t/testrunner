@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if ! [ -f /.dockerenv ] && ! grep -q 'devices:/docker' /proc/1/cgroup ; then
+  echo "Not running inside docker, exiting to avoid data damage." >&2
+  exit 1
+fi
+
+set -e
+set -u
+
+echo "JFYI, usage: $0 [<output_directory>] [junit]"
+
+OUTPUT_DIRECTORY="${1:-/results/}"
+mkdir -p "${OUTPUT_DIRECTORY}"
+results="${OUTPUT_DIRECTORY}/test_results.tap"
+echo "1..1" > "${results}"
+echo "ok 1 - All OK" >> "${results}"
+
+code_ro="/code"
+code_rw="/code_rw"
+
+# We need to make a copy here becuase in nature of npm is
+# to use current folder for dependencies installation.
+# It is dangerous as sources should not be chnaged during the test.
+mkdir -p "${code_rw}"
+cp -a "${code_ro}"/* "${code_rw}"
+cd "${code_rw}"
+
+if ! npm install ; then
+  echo "1..1" > "${results}"
+  echo "not ok 1 - 'nmp install' failed" >> "${results}"
+  exit 1
+fi
+
+if ! npm test ; then
+  echo "1..1" > "${results}"
+  echo "not ok 1 - 'nmp test' failed" >> "${results}"
+  exit 1
+fi
+
