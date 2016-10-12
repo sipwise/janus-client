@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if ! [ -f /.dockerenv ] && ! grep -q 'devices:/docker' /proc/1/cgroup ; then
+  echo "Not running inside docker, exiting to avoid data damage." >&2
+  exit 1
+fi
+
+set -e
+set -u
+
+code_ro="/code"
+code_rw="/code_rw"
+
+# We need to make a copy here becuase in nature of npm is
+# to use current folder for dependencies installation.
+# It is dangerous as sources should not be chnaged during the test.
+mkdir -p "${code_rw}"
+cp -a "${code_ro}"/* "${code_rw}"
+cd "${code_rw}"
+npm install
+npm test
+
