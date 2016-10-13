@@ -16,6 +16,24 @@
       "revId": "d0dddf68309a3869695b059faa94ff951b77c210",
       "serverId": "85315e57-5f03-49c3-83f8-201ae2313a75",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_b5838bcb",
+        "filename": "t/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2016-10-13T09:25:22Z",
+      "side": 1,
+      "message": "1) copied from https://gerrit.mgm.sipwise.com/gitweb?p\u003dngcp-rtcengine.git;a\u003dblob;f\u003dt/selenium/Dockerfile;h\u003dbcae46ab38e608682540b73c3b453f1c43d1045e;hb\u003dHEAD#l43\n\n2) Up to Hans-Peter here\n\n3) AFAIK, the version in repo is too outdated/broken, e,g, it doesn\u0027t provide \u0027npm\u0027 at all. Maybe we should just backport newer version to our repo and use it from repository.\n\nHans-Peter please comment it here. Tnx!",
+      "parentUuid": "5a3f45e8_d5cd775f",
+      "revId": "d0dddf68309a3869695b059faa94ff951b77c210",
+      "serverId": "85315e57-5f03-49c3-83f8-201ae2313a75",
+      "unresolved": false
     }
   ]
 }
