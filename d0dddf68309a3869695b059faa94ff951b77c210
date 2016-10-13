@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_d5cd775f",
+        "filename": "t/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000002
+      },
+      "writtenOn": "2016-10-13T06:36:52Z",
+      "side": 1,
+      "message": "why are we using this if we have available nodejs: 4.3.1~dfsg-3~bpo8+1 in our repos?\n\nWhat is the point of testing with a different version?",
+      "revId": "d0dddf68309a3869695b059faa94ff951b77c210",
+      "serverId": "85315e57-5f03-49c3-83f8-201ae2313a75",
+      "unresolved": false
+    }
+  ]
+}
