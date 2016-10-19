@@ -31,6 +31,20 @@ var WebSocketEvent = {
 /**
  * @class
  */
+class ConnectionStateError extends Error {
+
+    constructor(client) {
+        super();
+        this.name = this.constructor.name;
+        this.message = 'Wrong connection state';
+        this.client = client;
+        this.state = client.getConnectionState();
+    }
+}
+
+/**
+ * @class
+ */
 class Client {
 
     constructor(options) {
@@ -45,6 +59,10 @@ class Client {
         this.transactions = {};
         this.timeoutTimer = null;
         this.timeout = options.timeout || 60000;
+    }
+
+    getConnectionState() {
+        return this.connectionState;
     }
 
     startTimeout() {
@@ -141,14 +159,18 @@ class Client {
 
     sendObject(obj) {
         return new Promise((resolve, reject)=>{
-            this.webSocket.send(JSON.stringify(obj), (err)=>{
-                if(_.isObject(err)) {
-                    reject(err);
-                } else {
-                    this.logger.debug('Sent message', obj);
-                    resolve();
-                }
-            });
+            if(this.connectionState === ConnectionState.CONNECTED) {
+                this.webSocket.send(JSON.stringify(obj), (err)=> {
+                    if (_.isObject(err)) {
+                        reject(err);
+                    } else {
+                        this.logger.debug('Sent message', obj);
+                        resolve();
+                    }
+                });
+            } else {
+                throw new ConnectionStateError(this);
+            }
         });
     }
 

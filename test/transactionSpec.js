@@ -7,7 +7,7 @@ var assert = require('chai').assert;
 var validator = require('validator');
 
 var request = {
-    request: 'foo'
+    janus: 'foo'
 };
 
 var defaultHandler = function() {
@@ -67,7 +67,7 @@ describe('Transaction', function(){
         });
         this.timeout(timeout + 500);
         transaction.onResponse(function(response){
-            //assert.deepEqual(clientResponse, response);
+            assert.deepEqual(clientResponse, response);
             done();
         });
         transaction.timeout(timeout).start();

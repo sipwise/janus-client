@@ -2,8 +2,12 @@
 
 var Transaction = require('../src/transaction').Transaction;
 var Client = require('../src/client').Client;
-var WebSocketMock = require('../src/mock/ws').WebSocketMock;
+var WebSocketMock = require('../src/mock/web-socket').WebSocketMock;
 var assert = require('chai').assert;
+
+var request = {
+    janus: 'foo'
+};
 
 describe('Client', function() {
 
@@ -44,9 +48,7 @@ describe('Client', function() {
         var client = new Client({
             webSocket: webSocket
         });
-        var transaction = client.transact({
-            request: 'foo'
-        });
+        var transaction = client.transact(request);
         assert.instanceOf(transaction, Transaction);
         done();
     });
@@ -59,9 +61,7 @@ describe('Client', function() {
         });
 
         client.on('connected',()=>{
-            client.request({
-                request: 'foo'
-            }).then((res)=>{
+            client.request(request).then((res)=>{
                 assert(res.getRequest(), res.getResponse());
                 done();
             }).catch((err)=>{
