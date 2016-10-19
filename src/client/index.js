@@ -39,7 +39,7 @@ class Client {
         this.logger = options.logger || logger || console;
         this.requestTimeout = options.requestTimeout || 6000;
         this.protocol = 'janus-protocol';
-        this.webSocket = null;
+        this.webSocket = options.webSocket || null;
         this.connectionState = ConnectionState.DISCONNECTED;
         this.emitter = new EventEmitter();
         this.transactions = {};
@@ -61,7 +61,11 @@ class Client {
     }
 
     connect() {
-        this.webSocket = new WebSocket(this.url, this.protocol);
+
+        if(this.webSocket === null) {
+            this.webSocket = new WebSocket(this.url, this.protocol);
+        }
+
         this.webSocket.on(WebSocketEvent.open, ()=>{
             this.webSocketOpen();
         });

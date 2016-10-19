@@ -1,23 +1,73 @@
 'use strict';
 
-var Janus = require('../src/janus').Janus;
-var WebSocketServer = require('ws').Server;
-var WebServer = require('http').createServer;
-var Plugins = require('../src/constants').Plugins;
+var Transaction = require('../src/transaction').Transaction;
+var Client = require('../src/client').Client;
+var WebSocketMock = require('../src/mock/ws').WebSocketMock;
+var assert = require('chai').assert;
 
-var server = WebServer();
-var webSocketServer = new WebSocketServer({
-    server: server
-});
+describe('Client', function() {
 
-server.listen(6000, function(){
+    it('should connect the client', function(done){
 
-    describe('Client', function(){
-
-        it('should connect', function(done){
+        var webSocket = new WebSocketMock();
+        var client = new Client({
+            webSocket: webSocket
+        });
+        client.on('connected',()=>{
             done();
         });
+        client.connect();
     });
 
-    run();
+    it('should send and receive an object', function(done){
+
+        var obj = {
+            foo: 'bar'
+        };
+        var webSocket = new WebSocketMock();
+        var client = new Client({
+            webSocket: webSocket
+        });
+        client.on('connected',()=>{
+            client.sendObject(obj);
+        });
+        client.on('object', (receivedObj)=>{
+            assert.deepEqual(obj, receivedObj);
+            done();
+        });
+        client.connect();
+    });
+
+    it('should create a transaction', function(done){
+
+        var webSocket = new WebSocketMock();
+        var client = new Client({
+            webSocket: webSocket
+        });
+        var transaction = client.transact({
+            request: 'foo'
+        });
+        assert.instanceOf(transaction, Transaction);
+        done();
+    });
+
+    it('should create a request', function(done){
+
+        var webSocket = new WebSocketMock();
+        var client = new Client({
+            webSocket: webSocket
+        });
+
+        client.on('connected',()=>{
+            client.request({
+                request: 'foo'
+            }).then((res)=>{
+                assert(res.getRequest(), res.getResponse());
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
+        });
+        client.connect();
+    });
 });
