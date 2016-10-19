@@ -4,8 +4,9 @@ var _ = require('lodash');
 var WebSocket = require('ws');
 var EventEmitter = require('events').EventEmitter;
 var Promise = require('bluebird');
-var Transaction = require('./transaction').Transaction;
+var Transaction = require('../transaction').Transaction;
 var logger = require('debug-logger')('janus:client');
+var ClientResponse = require('./response').ClientResponse;
 
 var ConnectionState = {
     CONNECTED: 'CONNECTED',
@@ -26,41 +27,6 @@ var WebSocketEvent = {
     error: 'error',
     close: 'close'
 };
-
-/**
- * @class
- */
-class ClientResponse {
-
-    constructor(req, res) {
-        this.request = req;
-        this.response = res;
-    }
-
-    getRequest() {
-        return this.request;
-    }
-
-    getResponse() {
-        return this.response;
-    }
-
-    getType() {
-        return _.get(this.response, 'janus', null);
-    }
-
-    isError() {
-        return this.getType() === 'error';
-    }
-
-    isAck() {
-        return this.getType() === 'ack';
-    }
-
-    isSuccess() {
-        return this.getType() === 'success';
-    }
-}
 
 /**
  * @class
@@ -215,8 +181,7 @@ class Client {
     }
 }
 
-exports.Client = Client;
-exports.ClientEvent = ClientEvent;
-exports.ConnectionState = ConnectionState;
-exports.WebSocketEvent = WebSocketEvent;
-exports.ClientResponse = ClientResponse;
+module.exports.Client = Client;
+module.exports.ClientEvent = ClientEvent;
+module.exports.ConnectionState = ConnectionState;
+module.exports.WebSocketEvent = WebSocketEvent;

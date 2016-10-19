@@ -1,9 +1,12 @@
 'use strict';
 
+var path = require('path');
 var _ = require('lodash');
 var createId = require('uuid');
 var EventEmitter = require('events').EventEmitter;
 var ResponseError = require('./errors').ResponseError;
+var assert = require('chai').assert;
+var ClientResponse = require('./client/response').ClientResponse;
 
 var State = {
     new: 'new',
@@ -49,9 +52,11 @@ class TransactionTimeoutError {
 class Transaction {
 
     constructor(request, handler) {
+        assert.property(request, 'request');
+        assert.isFunction(handler);
+
         this.id = createId();
-        this.request = request;
-        this.request.transaction = this.id;
+        this.request = _.isObject(request)? request : {};
         this.emitter = new EventEmitter();
         this.handler = handler;
         this.state = State.new;
@@ -59,6 +64,7 @@ class Transaction {
         this.timeoutMilli = 6000;
         this.useTimeout = false;
         this.acknowledged = false;
+        _.set(this.request, 'transaction', this.id);
     }
 
     getId() {
@@ -73,6 +79,10 @@ class Transaction {
         return this.state;
     }
 
+    getTimeoutMilli() {
+        return this.timeoutMilli;
+    }
+
     start() {
         if(this.state === State.new) {
             this.state = State.started;
@@ -85,6 +95,9 @@ class Transaction {
     }
 
     response(res) {
+        assert.instanceOf(res, ClientResponse);
+        assert.property(res.getResponse(), 'transaction', 'Missing transaction id');
+        assert.equal(res.getResponse().transaction, this.getId(), 'Invalid transaction id');
         if(this.state === State.started) {
             this.startTimeout();
             if(res.isError()) {
@@ -180,4 +193,6 @@ class Transaction {
     }
 }
 
-exports.Transaction = Transaction;
+module.exports.Transaction = Transaction;
+module.exports.TransactionTimeoutError = TransactionTimeoutError;
+module.exports.InvalidTransactionState = InvalidTransactionState;

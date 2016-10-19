@@ -1,9 +1,9 @@
 
-exports.PluginNames = {
+module.exports.PluginNames = {
     VideoRoom: 'janus.plugin.videoroom'
 };
 
-exports.JanusEvents = {
+module.exports.JanusEvents = {
     webrtcup: 'webrtcup',
     media: 'media',
     hangup: 'hangup'

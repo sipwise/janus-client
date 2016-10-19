@@ -167,4 +167,4 @@ class Janus {
     }
 }
 
-exports.Janus = Janus;
+module.exports.Janus = Janus;

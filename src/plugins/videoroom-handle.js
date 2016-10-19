@@ -385,4 +385,4 @@ class Listener extends VideoRoomParticipant {
     }
 }
 
-exports.VideoRoomHandle = VideoRoomHandle;
+module.exports.VideoRoomHandle = VideoRoomHandle;

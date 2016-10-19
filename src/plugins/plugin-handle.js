@@ -95,4 +95,4 @@ class PluginHandle {
     }
 }
 
-exports.PluginHandle = PluginHandle;
+module.exports.PluginHandle = PluginHandle;

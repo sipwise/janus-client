@@ -152,5 +152,5 @@ class Session {
     }
 }
 
-exports.Session = Session;
-exports.SessionState = State;
+module.exports.Session = Session;
+module.exports.SessionState = State;
