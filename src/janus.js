@@ -4,16 +4,14 @@ var _ = require('lodash');
 var Promise = require('bluebird');
 var client = require('./client');
 var Client = client.Client;
+var ClientConnectionState = client.ConnectionState;
 var ClientEvent = client.ClientEvent;
 var EventEmitter = require('events').EventEmitter;
 var Session = require('./session').Session;
 var ResponseError = require('./errors').ResponseError;
 var logger = require('debug-logger')('janus');
 
-var State = {
-    connected: 'connected',
-    disconnected: 'disconnected'
-};
+var ConnectionState = ClientConnectionState;
 
 /**
  * @class
@@ -47,11 +45,15 @@ class Janus {
         };
         this.emitter = new EventEmitter();
         this.sessions = {};
-        this.state = State.disconnected;
+        this.connectionState = this.getConnectionState();
+    }
+
+    getConnectionState() {
+        return this.client.getConnectionState();
     }
 
     clientConnected() {
-        this.state = State.connected;
+        this.connectionState = this.client.getConnectionState();
         this.getInfo().then((res)=>{
             this.info = res.response;
             this.emitter.emit('connected');
@@ -61,7 +63,7 @@ class Janus {
     }
 
     clientDisconnected() {
-        this.state = State.disconnected;
+        this.connectionState = this.client.getConnectionState();
     }
 
     clientObject(obj) {
@@ -70,9 +72,9 @@ class Janus {
         } else if(obj.janus === 'timeout' && this.hasSession(obj.session_id)) {
             this.deleteSession(obj.session_id);
         } else if(obj.janus === 'timeout') {
-            // Todo: Log dropped timeout
+            logger.info('Dropped session timeout event');
         } else {
-            // Todo: emit janus event
+            this.emitter.emit('event', obj);
         }
     }
 
@@ -82,7 +84,9 @@ class Janus {
     }
 
     connect() {
-        this.client.connect();
+        if(this.getConnectionState() === ConnectionState.DISCONNECTED) {
+            this.client.connect();
+        }
     }
 
     createSession() {
@@ -104,6 +108,21 @@ class Janus {
                         this.deleteSession(session.getId());
                     });
                     resolve(session);
+                } else {
+                    reject(new ResponseError(res.getRequest(), res));
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    destroySession(id) {
+        return new Promise((resolve, reject)=>{
+            this.client.request({ janus: 'destroy' }).then((res)=>{
+                if(res.isSuccess()) {
+                    this.deleteSession(id);
+                    resolve();
                 } else {
                     reject(new ResponseError(res.getRequest(), res));
                 }
@@ -151,7 +170,11 @@ class Janus {
     }
 
     isConnected() {
-        return this.state === State.connected;
+        return this.getConnectionState() === ConnectionState.CONNECTED;
+    }
+
+    triggerError(err) {
+        this.emitter.emit('error', err);
     }
 
     onConnected(listener) {
@@ -162,9 +185,14 @@ class Janus {
         this.emitter.on('disconnected', listener);
     }
 
+    onEvent(listener) {
+        this.emitter.on('event', listener);
+    }
+
     onError(listener) {
         this.emitter.on('error', listener);
     }
 }
 
 module.exports.Janus = Janus;
+module.exports.ConnectionState = ConnectionState;

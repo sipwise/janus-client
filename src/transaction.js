@@ -52,7 +52,7 @@ class TransactionTimeoutError {
 class Transaction {
 
     constructor(request, handler) {
-        assert.property(request, 'request');
+        assert.property(request, 'janus');
         assert.isFunction(handler);
 
         this.id = createId();

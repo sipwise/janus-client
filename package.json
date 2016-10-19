@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "src/janus.js",
   "scripts": {
-    "test": "mocha -R spec --delay test/*Spec.js"
+    "test": "mocha -R spec --ui bdd --full-trace test/*Spec.js"
   },
   "author": "",
   "license": "ISC",

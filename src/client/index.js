@@ -31,6 +31,20 @@ var WebSocketEvent = {
 /**
  * @class
  */
+class ConnectionStateError extends Error {
+
+    constructor(client) {
+        super();
+        this.name = this.constructor.name;
+        this.message = 'Wrong connection state';
+        this.client = client;
+        this.state = client.getConnectionState();
+    }
+}
+
+/**
+ * @class
+ */
 class Client {
 
     constructor(options) {
@@ -39,12 +53,16 @@ class Client {
         this.logger = options.logger || logger || console;
         this.requestTimeout = options.requestTimeout || 6000;
         this.protocol = 'janus-protocol';
-        this.webSocket = null;
+        this.webSocket = options.webSocket || null;
         this.connectionState = ConnectionState.DISCONNECTED;
         this.emitter = new EventEmitter();
         this.transactions = {};
         this.timeoutTimer = null;
         this.timeout = options.timeout || 60000;
+    }
+
+    getConnectionState() {
+        return this.connectionState;
     }
 
     startTimeout() {
@@ -61,7 +79,11 @@ class Client {
     }
 
     connect() {
-        this.webSocket = new WebSocket(this.url, this.protocol);
+
+        if(this.webSocket === null) {
+            this.webSocket = new WebSocket(this.url, this.protocol);
+        }
+
         this.webSocket.on(WebSocketEvent.open, ()=>{
             this.webSocketOpen();
         });
@@ -137,14 +159,18 @@ class Client {
 
     sendObject(obj) {
         return new Promise((resolve, reject)=>{
-            this.webSocket.send(JSON.stringify(obj), (err)=>{
-                if(_.isObject(err)) {
-                    reject(err);
-                } else {
-                    this.logger.debug('Sent message', obj);
-                    resolve();
-                }
-            });
+            if(this.connectionState === ConnectionState.CONNECTED) {
+                this.webSocket.send(JSON.stringify(obj), (err)=> {
+                    if (_.isObject(err)) {
+                        reject(err);
+                    } else {
+                        this.logger.debug('Sent message', obj);
+                        resolve();
+                    }
+                });
+            } else {
+                throw new ConnectionStateError(this);
+            }
         });
     }
 
