@@ -18,7 +18,7 @@ class WebSocketMock {
         logger.info('Close');
         setTimeout(()=>{
             this.emitter.emit('close');
-        }, 500);
+        }, 80);
     }
 
     on(event, listener) {
@@ -39,17 +39,34 @@ class WebSocketMock {
                 case 'destroy':
                     this.triggerMessage(janusResponse.destroySession(obj));
                     break;
+                case 'keepalive':
+                    this.triggerMessage(janusResponse.keepAlive(obj));
+                    break;
+                case 'attach':
+                    switch(obj.plugin) {
+                        case 'janus.plugin.videoroom':
+                            this.triggerMessage(janusResponse.createVideoRoomHandle(obj));
+                            break;
+                    }
+                    break;
+                case 'message':
+                    switch(obj.body.request) {
+                        case 'create':
+                            this.triggerMessage(janusResponse.createVideoRoom(obj));
+                            break;
+                    }
+                    break;
                 default:
                     this.triggerMessage(message);
                     break;
             }
-        }, 100);
+        }, 80);
     }
 
     triggerOpen() {
         setTimeout(()=>{
             this.emitter.emit('open');
-        }, 500);
+        }, 80);
     }
 
     triggerMessage(message) {

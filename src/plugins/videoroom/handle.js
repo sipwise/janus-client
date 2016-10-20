@@ -1,13 +1,12 @@
 'use strict';
 
-var createId = require('uuid').v4;
 var _ = require('lodash');
 var Promise = require('bluebird');
-var PluginHandle = require('./plugin-handle').PluginHandle;
-var PluginNames = require('../constants').PluginNames;
-var PluginError = require('../errors').PluginError;
-var EventEmitter = require('events').EventEmitter;
-var logger = require('debug-logger')('janus:videoroom');
+var PluginHandle = require('../plugin-handle').PluginHandle;
+var PluginNames = require('../../constants').PluginNames;
+var VideoRoom = require('./room').VideoRoom;
+var PluginError = require('../../errors').PluginError;
+var logger = require('debug-logger')('janus:videoroom:handle');
 
 /**
  * @class
@@ -209,175 +208,6 @@ class VideoRoomHandle extends PluginHandle {
             });
             listener.init().then(()=>{
                 resolve(listener);
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-}
-
-/**
- * @class
- */
-class VideoRoom {
-
-    constructor(options, handle) {
-        this.room = options.room;
-        this.handle = handle;
-    }
-}
-
-/**
- * @class
- */
-class VideoRoomParticipant {
-
-    constructor(options) {
-        this.session = options.session;
-        this.offer = options.offer;
-        this.room = options.room;
-        this.handle = null;
-        this.answer = null;
-    }
-
-    init() {
-        return new Promise((resolve, reject)=>{
-            this.session.createVideoRoomHandle().then((handle)=>{
-                this.handle = handle;
-                resolve();
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    getRoom() {
-        return this.room;
-    }
-
-    setOffer(offer) {
-        this.offer = offer;
-    }
-
-    getOffer() {
-        return this.offer;
-    }
-
-    setAnswer(answer) {
-        this.answer = answer;
-    }
-
-    getAnswer() {
-        return this.answer;
-    }
-
-    trickle(candidate) {
-        return this.handle.trickle(candidate);
-    }
-}
-
-/**
- * @class
- */
-class Publisher extends VideoRoomParticipant {
-
-    constructor(options) {
-        super(options);
-        this.id = options.id;
-        this.emitter = new EventEmitter();
-        this.listeners = {};
-    }
-
-    getId() {
-        return this.id;
-    }
-
-    addListener(listener) {
-        this.listeners[listener.getFeed()] = listener;
-    }
-
-    removeListener(id) {
-        delete this.listeners[id];
-    }
-
-    join(offer) {
-        return new Promise((resolve, reject)=>{
-            this.setOffer(offer);
-            this.handle.publish({
-                room: this.room,
-                jsep: {
-                    type: 'offer',
-                    sdp: this.getOffer()
-                }
-            }).then((result)=>{
-                this.id = result.id;
-                this.answer = result.answer;
-                _.forEach(result.publishers, (publisher)=>{
-                    this.handle.createListener(this.room, publisher.id).then((listener)=>{
-                        this.addListener(listener);
-                        return listener.createOffer();
-                    }).then(()=>{
-                        this.emitter.emit('joined', this.listeners[publisher.id]);
-                    }).catch((err)=>{
-                        logger.error(err);
-                    });
-                });
-                resolve();
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    onJoined(listener) {
-        this.emitter.on('joined', listener);
-    }
-}
-
-/**
- * @class
- */
-class Listener extends VideoRoomParticipant {
-
-    constructor(options) {
-        super(options);
-        this.feed = options.feed;
-    }
-
-    getFeed() {
-        return this.feed;
-    }
-
-    createOffer() {
-        return new Promise((resolve, reject)=>{
-            this.handle.listen({
-                room: this.room,
-                feed: this.feed
-            }).then((result)=>{
-                this.offer = result.offer;
-                resolve();
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    setAnswer(sdp) {
-        this.answer = sdp.replace(/a=(sendrecv|sendonly)/, 'a=recvonly');
-    }
-
-    setRemoteAnswer(answer) {
-        return new Promise((resolve, reject)=>{
-            this.setAnswer(answer);
-            this.handle.start({
-                room: this.room,
-                feed: this.feed,
-                jsep: {
-                    type: 'answer',
-                    sdp: this.getAnswer()
-                }
-            }).then(()=>{
-                resolve();
             }).catch((err)=>{
                 reject(err);
             });

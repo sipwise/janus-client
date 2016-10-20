@@ -1,5 +1,5 @@
 
-module.exports.info = function(req) {
+module.exports.info = function info(req) {
 
   return {
       janus: 'server_info',
@@ -93,16 +93,42 @@ module.exports.info = function(req) {
               version: 6 } } };
 };
 
-module.exports.createSession = function(req) {
+module.exports.createSession = function createSession(req) {
 
     return { janus: 'success',
         transaction: req.transaction,
         data: { id: 1424579626 } };
 };
 
-module.exports.destroySession = function(req) {
+module.exports.destroySession = function destroySession(req) {
 
     return { janus: 'success',
         transaction: req.transaction,
         data: { id: 1424579626 } };
+};
+
+module.exports.keepAlive = function keepAlive(req) {
+
+    return { janus: 'ack',
+        session_id: req.session_id,
+        transaction: req.transaction }
+};
+
+module.exports.createVideoRoomHandle = function createVideoRoomHandle(req) {
+
+    return { janus: 'success',
+        session_id: req.session_id,
+        transaction: req.transaction,
+        data: { id: 1856019541 } };
+};
+
+module.exports.createVideoRoom = function createVideoRoom(req) {
+
+    return { janus: 'success',
+        session_id: req.session_id,
+        sender: req.handle_id,
+        transaction: req.transaction,
+        plugindata:
+        { plugin: 'janus.plugin.videoroom',
+            data: { videoroom: 'created', room: 2146929290 } } }
 };

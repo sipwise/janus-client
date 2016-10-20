@@ -1,3 +1,3 @@
 
 
-module.exports.VideoRoom = require('./videoroom-handle').VideoRoomHandle;
+module.exports.VideoRoom = require('./videoroom/handle').VideoRoomHandle;
