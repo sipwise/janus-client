@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a4c51b2_bcdc2176",
+        "filename": "package.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1000029
+      },
+      "writtenOn": "2016-10-20T15:10:10Z",
+      "side": 1,
+      "message": "Are those options not standard anyway?",
+      "range": {
+        "startLine": 6,
+        "startChar": 19,
+        "endLine": 6,
+        "endChar": 48
+      },
+      "revId": "76d589d61e5dea0900c9ae24033eee7f17082703",
+      "serverId": "85315e57-5f03-49c3-83f8-201ae2313a75",
+      "unresolved": false
+    }
+  ]
+}
