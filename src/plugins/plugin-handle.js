@@ -9,15 +9,10 @@ var JanusEvents = require('../constants').JanusEvents;
  */
 class PluginHandle {
 
-    constructor(name, id, session) {
-        this.name = name;
+    constructor(id, session) {
         this.id = id;
         this.session = session;
         this.emitter = new EventEmitter();
-    }
-
-    getName() {
-        return this.name;
     }
 
     getId() {
@@ -26,6 +21,34 @@ class PluginHandle {
 
     getSession() {
         return this.session;
+    }
+
+    detach() {
+        return this.request({
+            janus: 'detach'
+        });
+    }
+
+    hangup() {
+        return this.request({
+            janus: 'hangup'
+        });
+    }
+
+    trickle(candidate) {
+        return this.request({
+            janus: 'trickle',
+            candidate: candidate
+        });
+    }
+
+    trickleCompleted() {
+        return this.request({
+            janus: 'trickle',
+            candidate: {
+                completed: true
+            }
+        });
     }
 
     emitEvent(event) {

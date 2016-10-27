@@ -101,7 +101,7 @@ class Transaction {
         if(this.state === State.started) {
             this.startTimeout();
             if(res.isError()) {
-                this.error(new ResponseError(res.getRequest(), res));
+                this.error(new ResponseError(res));
             } else if(res.isAck()) {
                 this.acknowledged = true;
                 this.emitter.emit('ack');

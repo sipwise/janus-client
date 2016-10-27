@@ -7,12 +7,11 @@ var _ = require('lodash');
  */
 class ResponseError extends Error {
 
-    constructor(req, res) {
+    constructor(res) {
         super();
         this.name = this.constructor.name;
-        this.message = _.get(res, 'error.reason', null);
-        this.code = _.get(res, 'error.code', null);
-        this.request = req;
+        this.message = _.get(res.getResponse(), 'error.reason', null);
+        this.code = _.get(res.getResponse(), 'error.code', null);
         this.response = res;
     }
 
@@ -22,10 +21,6 @@ class ResponseError extends Error {
 
     getMessage() {
         return this.message;
-    }
-
-    getRequest() {
-        return this.request;
     }
 
     getResponse() {

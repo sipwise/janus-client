@@ -7,10 +7,14 @@ var Promise = require('bluebird');
 var Transaction = require('../transaction').Transaction;
 var logger = require('debug-logger')('janus:client');
 var ClientResponse = require('./response').ClientResponse;
+var Session = require('../session').Session;
+var ResponseError = require('../errors').ResponseError;
+var assert = require('chai').assert;
+var JanusEvents = require('../constants').JanusEvents;
 
 var ConnectionState = {
-    CONNECTED: 'CONNECTED',
-    DISCONNECTED: 'DISCONNECTED'
+    connected: 'connected',
+    disconnected: 'disconnected'
 };
 
 var ClientEvent = {
@@ -18,7 +22,8 @@ var ClientEvent = {
     disconnected: 'disconnected',
     object: 'object',
     error: 'error',
-    timeout: 'timeout'
+    timeout: 'timeout',
+    event: 'event'
 };
 
 var WebSocketEvent = {
@@ -49,67 +54,89 @@ class Client {
 
     constructor(options) {
         options = options || {};
-        this.url = options.url || 'ws://localhost:8188';
-        this.logger = options.logger || logger || console;
+        this.url = _.get(options, 'url', 'ws://localhost:8188');
+        this.logger = _.get(options, 'logger', logger);
         this.requestTimeout = options.requestTimeout || 6000;
         this.protocol = 'janus-protocol';
-        this.webSocket = options.webSocket || null;
-        this.connectionState = ConnectionState.DISCONNECTED;
+        this.webSocket = null;
         this.emitter = new EventEmitter();
         this.transactions = {};
-        this.timeoutTimer = null;
-        this.timeout = options.timeout || 60000;
+        this.connectionTimeoutTimer = null;
+        this.connectionTimeout = options.connectionTimeout || 10000;
+        this.lastConnectionEvent = ClientEvent.disconnected;
+        this.sessions = {};
+        this.hasInfo = false;
+        this.info = {};
+        this.reconnect = _.isBoolean(options.reconnect)? options.reconnect : true;
     }
 
-    getConnectionState() {
-        return this.connectionState;
+    getVersion() {
+        return (this.hasInfo)? this.info.version_string : '';
     }
 
-    startTimeout() {
-        this.stopTimeout();
-        this.timeoutTimer = setTimeout(()=>{
-            this.emitter.emit(ClientEvent.timeout);
-        }, this.timeout);
-    }
-
-    stopTimeout() {
-        if(this.timeoutTimer !== null) {
-            clearTimeout(this.timeoutTimer);
-        }
+    isConnected() {
+        return _.isObject(this.webSocket) && this.webSocket.readyState === 1;
     }
 
     connect() {
-
         if(this.webSocket === null) {
             this.webSocket = new WebSocket(this.url, this.protocol);
+            this.webSocket.on(WebSocketEvent.open, ()=>{ this.open(); });
+            this.webSocket.on(WebSocketEvent.close, ()=>{ this.close(); });
+            this.webSocket.on(WebSocketEvent.message, (message)=>{ this.message(message); });
+            this.webSocket.on(WebSocketEvent.error, (err)=>{ this.error(err); });
+            this.startConnectionTimeout();
         }
-
-        this.webSocket.on(WebSocketEvent.open, ()=>{
-            this.webSocketOpen();
-        });
-        this.webSocket.on(WebSocketEvent.close, ()=>{
-            this.webSocketClose();
-        });
-        this.webSocket.on(WebSocketEvent.message, (message)=>{
-            this.webSocketMessage(message);
-        });
-        this.webSocket.on(WebSocketEvent.error, (err)=>{
-            this.webSocketError(err);
-        });
     }
 
-    webSocketOpen() {
-        this.setConnectionState(ConnectionState.CONNECTED);
+    disconnect() {
+        this.close();
     }
 
-    webSocketClose() {
-        this.setConnectionState(ConnectionState.DISCONNECTED);
+    open() {
+        if(this.isConnected() && this.lastConnectionEvent === ClientEvent.disconnected) {
+            this.lastConnectionEvent = ClientEvent.connected;
+            this.getInfo().then((info)=>{
+                this.info = info.getResponse();
+                this.emitter.emit(ClientEvent.connected);
+            }).catch((err)=>{
+                this.error(err);
+            });
+        }
     }
 
-    webSocketMessage(message) {
+    close(options) {
+        var connect = _.get(options, 'connect', false);
+        var closeHandler = ()=>{
+            this.stopConnectionTimeout();
+            if(this.webSocket !== null) {
+                this.webSocket.removeAllListeners(WebSocketEvent.open);
+                this.webSocket.removeAllListeners(WebSocketEvent.message);
+                this.webSocket.removeAllListeners(WebSocketEvent.error);
+                this.webSocket.removeAllListeners(WebSocketEvent.close);
+                this.webSocket = null;
+            }
+            if(this.lastConnectionEvent === ClientEvent.connected) {
+                this.lastConnectionEvent = ClientEvent.disconnected;
+                this.emitter.emit(ClientEvent.disconnected);
+            }
+            if(connect === true) {
+                this.connect();
+            }
+        };
+        if(_.isObject(this.webSocket) && this.isConnected()) {
+            this.webSocket.removeAllListeners('close');
+            this.webSocket.on('close', ()=>{
+                closeHandler();
+            });
+            this.webSocket.close();
+        } else {
+            closeHandler();
+        }
+    }
 
-        this.startTimeout();
-
+    message(message) {
+        this.startConnectionTimeout();
         var obj;
         try {
             obj = JSON.parse(message);
@@ -120,46 +147,76 @@ class Client {
         }
     }
 
-    webSocketError(err) {
+    error(err) {
         this.emitter.emit(ClientEvent.error, err);
     }
 
-    setConnectionState(state) {
-        var hasState = this.connectionState === state;
-        if(!hasState) {
-            switch(state) {
-                case ConnectionState.CONNECTED:
-                case ConnectionState.DISCONNECTED:
-                    this.connectionState = state;
-                    this.emitter.emit(state.toLowerCase());
-                    break;
-                default:
-                    throw new Error('Invalid state ' + state);
-            }
+    getConnectionState() {
+        return (this.isConnected())? ConnectionState.connected : ConnectionState.disconnected;
+    }
+
+    setConnectionTimeout(timeout) {
+        this.connectionTimeout = timeout;
+        if(this.connectionTimeoutTimer !== null) {
+            this.startConnectionTimeout();
         }
     }
 
-    on(type, listener) {
-        this.emitter.on(type, listener);
+    startConnectionTimeout() {
+        this.stopConnectionTimeout();
+        this.connectionTimeoutTimer = setTimeout(()=>{
+            this.close({
+                connect: this.reconnect
+            });
+        }, this.connectionTimeout);
     }
 
-    off(type, listener) {
-        this.emitter.removeListener(type, listener);
+    stopConnectionTimeout() {
+        if(this.connectionTimeoutTimer !== null) {
+            clearTimeout(this.connectionTimeoutTimer);
+        }
     }
 
     dispatchObject(obj) {
-        if(_.isString(obj.transaction) && this.transactions[obj.transaction] instanceof Transaction) {
-            var transaction = this.transactions[obj.transaction];
-            var response = new ClientResponse(transaction.getRequest(), obj);
+        var transactionId = _.get(obj, 'transaction', null);
+        var transaction;
+        var response;
+        if(transactionId !== null && this.transactions[transactionId] instanceof Transaction) {
+            transaction = this.transactions[obj.transaction];
+            response = new ClientResponse(transaction.getRequest(), obj);
             transaction.response(response);
+        } else if (transactionId !== null) {
+            logger.info('Dropped response, because transaction does not exists', obj);
         } else {
-            this.emitter.emit(ClientEvent.object, obj);
+            this.delegateEvent(obj);
+        }
+    }
+
+    delegateEvent(event) {
+        var sessionId = _.get(event, 'session_id', null);
+        if(sessionId !== null && this.hasSession(sessionId)) {
+            switch(event.janus) {
+                case JanusEvents.timeout:
+                    this.deleteSession(sessionId);
+                    break;
+                case JanusEvents.webrtcup:
+                case JanusEvents.media:
+                case JanusEvents.hangup:
+                    this.sessions[sessionId].event(event);
+                    break;
+                default:
+                    logger.info('Dropped unknown session event', event);
+                    break;
+            }
+        } else {
+            logger.info('Dropped session event, because session does not exists', event);
         }
     }
 
     sendObject(obj) {
         return new Promise((resolve, reject)=>{
-            if(this.connectionState === ConnectionState.CONNECTED) {
+            assert.isObject(obj);
+            if(this.isConnected()) {
                 this.webSocket.send(JSON.stringify(obj), (err)=> {
                     if (_.isObject(err)) {
                         reject(err);
@@ -205,9 +262,114 @@ class Client {
             }).timeout(requestTimeout).start();
         });
     }
+
+    hasSession(id) {
+        return this.sessions[id] instanceof Session;
+    }
+
+    addSession(session) {
+        this.sessions[session.getId()] = session;
+    }
+
+    deleteSession(id) {
+        delete this.sessions[id];
+        this.logger.info('Deleted session=%s', id);
+        this.logger.info('Sessions count=%s', Object.keys(this.sessions).length);
+    }
+
+    createSession() {
+        return new Promise((resolve, reject)=>{
+            this.request({ janus: 'create' }).then((res)=>{
+                if(res.isSuccess()) {
+                    var session = new Session(res.getResponse().data.id, this);
+                    this.addSession(session);
+                    this.logger.info('Created session=%s',session.getId());
+                    session.onKeepAlive((result)=>{
+                        if(result) {
+                            this.logger.debug('KeepAlive session=%s', session.getId());
+                        } else {
+                            this.logger.warn('KeepAlive failed session=%s', session.getId());
+                        }
+                    });
+                    session.onTimeout(()=>{
+                        this.logger.info('Timeout session=%s',session.getId());
+                        this.deleteSession(session.getId());
+                    });
+                    resolve(session);
+                } else {
+                    reject(new ResponseError(res));
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    destroySession(id) {
+        return new Promise((resolve, reject)=>{
+            this.request({ janus: 'destroy' }).then((res)=>{
+                if(res.isSuccess()) {
+                    this.deleteSession(id);
+                    resolve();
+                } else {
+                    reject(new ResponseError(res));
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    getInfo() {
+        return new Promise((resolve, reject)=>{
+            this.request({ janus: 'info' }).then((res)=>{
+                if(res.getType() === 'server_info') {
+                    this.hasInfo = true;
+                    resolve(res);
+                } else {
+                    reject(new ResponseError(res));
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    onConnected(listener) {
+        this.emitter.on(ClientEvent.connected, listener);
+    }
+
+    offConnected(listener) {
+        this.emitter.removeListener(ClientEvent.connected, listener);
+    }
+
+    onDisconnected(listener) {
+        this.emitter.on(ClientEvent.disconnected, listener);
+    }
+
+    offDisconnected(listener) {
+        this.emitter.removeListener(ClientEvent.disconnected, listener);
+    }
+
+    onError(listener) {
+        this.emitter.on(ClientEvent.error, listener);
+    }
+
+    offError(listener) {
+        this.emitter.removeListener(ClientEvent.error, listener);
+    }
+
+    onEvent(listener) {
+        this.emitter.on(ClientEvent.event, listener);
+    }
+
+    offEvent(listener) {
+        this.emitter.removeListener(ClientEvent.event, listener);
+    }
 }
 
 module.exports.Client = Client;
 module.exports.ClientEvent = ClientEvent;
 module.exports.ConnectionState = ConnectionState;
+module.exports.ConnectionStateError = ConnectionStateError;
 module.exports.WebSocketEvent = WebSocketEvent;

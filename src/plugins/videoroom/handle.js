@@ -3,7 +3,6 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
 var PluginHandle = require('../plugin-handle').PluginHandle;
-var PluginNames = require('../../constants').PluginNames;
 var VideoRoom = require('./room').VideoRoom;
 var PluginError = require('../../errors').PluginError;
 var logger = require('debug-logger')('janus:videoroom:handle');
@@ -13,8 +12,12 @@ var logger = require('debug-logger')('janus:videoroom:handle');
  */
 class VideoRoomHandle extends PluginHandle {
 
+    static getName() {
+        return 'janus.plugin.videoroom';
+    }
+
     constructor(options) {
-        super(PluginNames.VideoRoom, options.id, options.session);
+        super(options.id, options.session);
     }
 
     create() {
@@ -175,13 +178,6 @@ class VideoRoomHandle extends PluginHandle {
             }).catch((err)=>{
                 reject(err);
             });
-        });
-    }
-
-    trickle(candidate) {
-        return this.request({
-            janus: 'trickle',
-            candidate: candidate
         });
     }
 
