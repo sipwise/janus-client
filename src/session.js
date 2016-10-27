@@ -3,7 +3,6 @@
 var _ = require('lodash');
 var Promise = require('bluebird');
 var Plugins = require('./plugins');
-var PluginNames = require('./constants').PluginNames;
 var EventEmitter = require('events').EventEmitter;
 var logger = require('debug-logger')('janus:session');
 
@@ -75,14 +74,25 @@ class Session {
         return this.janus.request(obj, options);
     }
 
-    createPluginHandle(pluginName) {
+    createPluginHandle(plugin) {
         return new Promise((resolve, reject)=>{
             this.request({
                 janus: 'attach',
-                plugin: pluginName
+                plugin: plugin.getName()
             }).then((res)=>{
-                logger.info('Created handle plugin=%s handle=%s', pluginName, res.getResponse().data.id);
-                resolve(res.getResponse().data.id);
+                var handle;
+                var handleId = _.get(res.getResponse(), 'data.id', null);
+                if(handleId !== null) {
+                    logger.info('Created handle plugin=%s handle=%s', plugin.getName(), handleId);
+                    handle = new plugin({
+                        session: this,
+                        id: handleId
+                    });
+                    this.addPluginHandle(handle);
+                    resolve(handle);
+                } else {
+                    reject(new Error('Handle not created properly'));
+                }
             }).catch((err)=>{
                 reject(err);
             });
@@ -94,18 +104,7 @@ class Session {
     }
 
     createVideoRoomHandle() {
-        return new Promise((resolve, reject)=>{
-            this.createPluginHandle(PluginNames.VideoRoom).then((id)=>{
-                var pluginHandle = new Plugins.VideoRoom({
-                    session: this,
-                    id: id
-                });
-                this.addPluginHandle(pluginHandle);
-                resolve(pluginHandle);
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
+        return this.createPluginHandle(Plugins.VideoRoom);
     }
 
     getId() {
@@ -133,11 +132,11 @@ class Session {
         this.emitter.on('keepalive', listener);
     }
 
-    /**
-     * @param event
-     * @param [event.sender]
-     */
-    emitEvent(event) {
+    onError(listener) {
+        this.emitter.on('error', listener);
+    }
+
+    event(event) {
         if(event.sender && _.isObject(this.pluginHandles[event.sender])) {
             this.pluginHandles[event.sender].emitEvent(event);
         } else {
@@ -146,9 +145,16 @@ class Session {
     }
 
     destroy() {
-        this.stopKeepAlive();
-        this.pluginHandles = {};
-        this.janus = null;
+        return new Promise((resolve, reject)=>{
+            this.stopKeepAlive();
+            this.janus.destroySession(this.getId()).then(()=>{
+                this.pluginHandles = {};
+                this.janus = null;
+                resolve();
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
     }
 }
 

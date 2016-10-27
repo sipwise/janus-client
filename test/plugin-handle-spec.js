@@ -3,14 +3,12 @@
 var config = require('./config').config;
 var JanusServerMock = require('../src/mock/janus-server').JanusServer;
 var Client = require('../src/client').Client;
-var Session = require('../src/session').Session;
-var VideoRoomHandle = require('../src/plugins/videoroom/handle').VideoRoomHandle;
 var assert = require('chai').assert;
 
 var mockServerPort = config.janus.server.port;
 var mockServerUrl = config.janus.server.url;
 
-describe('Session', function() {
+describe('PluginHandle', function(){
 
     var janusServerMock;
     before(function(done){
@@ -28,15 +26,16 @@ describe('Session', function() {
         janusServerMock.close();
     });
 
-    var client;
-    var session;
+    var handle;
     beforeEach(function(done){
-        client = new Client({
+        var client = new Client({
             url: mockServerUrl
         });
         client.onConnected(()=>{
-            client.createSession().then((newSession)=>{
-                session = newSession;
+            client.createSession().then((session)=>{
+                return session.createVideoRoomHandle();
+            }).then((videoRoomHandle)=>{
+                handle = videoRoomHandle;
                 done();
             }).catch((err)=>{
                 done(err);
@@ -45,28 +44,24 @@ describe('Session', function() {
         client.connect();
     });
 
-    it('should send keep alive', function(done){
-        session.keepAlive().then(()=>{
+    it('should detach', function(done) {
+        handle.detach().then(()=>{
             done();
         }).catch((err)=>{
             done(err);
         });
     });
 
-    it('should create video room handle', function(done){
-        session.createVideoRoomHandle().then((handle)=>{
-            assert.instanceOf(handle, VideoRoomHandle);
+    it('should hangup', function(done) {
+        handle.hangup().then(()=>{
             done();
         }).catch((err)=>{
             done(err);
         });
     });
 
-    it('should destroy itself', function(done){
-        session.destroy().then(()=>{
-            done();
-        }).catch((err)=>{
-            done(err);
-        });
+    describe('VideoRoomHandle', function() {
+
+
     });
 });
