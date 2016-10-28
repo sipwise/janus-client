@@ -114,16 +114,21 @@ module.exports = {
                 session_id: req.session_id,
                 transaction: req.transaction }
         },
-        createVideoRoomHandle: function createVideoRoomHandle(req) {
+        createVideoRoomHandle: function createVideoRoomHandle(req, handle) {
 
             return { janus: 'success',
                 session_id: req.session_id,
                 transaction: req.transaction,
-                data: { id: 1856019541 } };
+                data: { id: handle } };
         }
     },
 
     handle: {
+        trickle: function detach(req) {
+            return { janus: 'ack',
+                session_id: req.session_id,
+                transaction: req.transaction}
+        },
         detach: function detach(req) {
             return { janus: 'success',
                 session_id: req.session_id,
@@ -137,7 +142,7 @@ module.exports = {
     },
 
     videoRoomHandle: {
-        createVideoRoom: function createVideoRoom(req) {
+        create: function create(req) {
             return { janus: 'success',
                 session_id: req.session_id,
                 sender: req.handle_id,
@@ -145,6 +150,34 @@ module.exports = {
                 plugindata:
                 { plugin: 'janus.plugin.videoroom',
                     data: { videoroom: 'created', room: 2146929290 } } }
+        },
+        destroy: function destroy(req) {
+            return { janus: 'success',
+                session_id: req.session_id,
+                sender: req.handle_id,
+                transaction: req.transaction,
+                plugindata:
+                { plugin: 'janus.plugin.videoroom',
+                    data: { videoroom: 'created', room: 2146929290 } } }
+        },
+        list: function list(req) {
+            return { janus: 'success',
+                session_id: req.session_id,
+                sender: req.handle_id,
+                transaction: req.transaction,
+                plugindata:
+                { plugin: 'janus.plugin.videoroom',
+                    data: { videoroom: 'success', list: [
+                        { room: 2146929290,
+                            description: 'Room 1790787516',
+                            max_publishers: 3,
+                            bitrate: 0,
+                            fir_freq: 0,
+                            audiocodec: 'opus',
+                            videocodec: 'vp8',
+                            record: 'false',
+                            num_participants: 0 }
+                    ] } } }
         }
     }
 };

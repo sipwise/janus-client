@@ -18,6 +18,10 @@ class JanusServer {
             server: this.http
         });
         this.ws.on('connection',(webSocket)=>{ this.triggerConnection(webSocket); });
+        this.handlesByName = {
+            'janus.plugin.videoroom': 773735142
+        };
+        this.handlesById = _.invert(this.handlesByName);
     }
 
     init() {
@@ -69,7 +73,8 @@ class JanusServer {
             case 'attach':
                 switch(object.plugin) {
                     case 'janus.plugin.videoroom':
-                        this.send(webSocket, JanusResponse.session.createVideoRoomHandle(object));
+                        this.send(webSocket, JanusResponse.session.createVideoRoomHandle(
+                            object, this.handlesByName[object.plugin]));
                         break;
                 }
                 break;
@@ -79,7 +84,32 @@ class JanusServer {
             case 'hangup':
                 this.send(webSocket, JanusResponse.handle.hangup(object));
                 break;
+            case 'trickle':
+                this.send(webSocket, JanusResponse.handle.trickle(object));
+                break;
+            case 'message':
+                var plugin = this.handlesById[object.handle_id];
+                switch(plugin) {
+                    case 'janus.plugin.videoroom':
+                        this.dispatchVideoRoom(webSocket, object);
+                        break;
+                }
+                break;
             default:
+                break;
+        }
+    }
+
+    dispatchVideoRoom(webSocket, object) {
+        switch(object.body.request) {
+            case 'create':
+                this.send(webSocket, JanusResponse.videoRoomHandle.create(object));
+                break;
+            case 'destroy':
+                this.send(webSocket, JanusResponse.videoRoomHandle.destroy(object));
+                break;
+            case 'list':
+                this.send(webSocket, JanusResponse.videoRoomHandle.list(object));
                 break;
         }
     }

@@ -6,6 +6,7 @@ var PluginHandle = require('../plugin-handle').PluginHandle;
 var VideoRoom = require('./room').VideoRoom;
 var PluginError = require('../../errors').PluginError;
 var logger = require('debug-logger')('janus:videoroom:handle');
+var Publisher = require('./publisher').Publisher;
 
 /**
  * @class
@@ -28,6 +29,19 @@ class VideoRoomHandle extends PluginHandle {
                 resolve(new VideoRoom({
                     room: _.get(res.getResponse(), 'plugindata.data.room', null)
                 }, this));
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    destroy(room) {
+        return new Promise((resolve, reject)=>{
+            this.requestMessage({
+                request: 'destroy',
+                room: room
+            }).then(()=>{
+                resolve();
             }).catch((err)=>{
                 reject(err);
             });

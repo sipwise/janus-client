@@ -60,8 +60,51 @@ describe('PluginHandle', function(){
         });
     });
 
+    it('should trickle', function(done) {
+        handle.trickle().then(()=>{
+            done();
+        }).catch((err)=>{
+            done(err);
+        });
+    });
+
+    it('should complete trickle', function(done) {
+        handle.trickleCompleted().then(()=>{
+            done();
+        }).catch((err)=>{
+            done(err);
+        });
+    });
+
     describe('VideoRoomHandle', function() {
 
+        it('should create a new room', function(done){
+            handle.create().then(()=>{
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
+        });
 
+        it('should destroy a room', function(done) {
+            done();
+        });
+
+        it('should check whether a room exists or not', function(done) {
+            done();
+        });
+
+        it('should list all rooms', function(done) {
+            handle.list().then((list)=>{
+                assert.isArray(list);
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
+        });
+
+        it('should list all participants', function(done) {
+            done();
+        });
     });
 });

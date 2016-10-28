@@ -4,7 +4,7 @@ var config = require('./config').config;
 var JanusServerMock = require('../src/mock/janus-server').JanusServer;
 var Client = require('../src/client').Client;
 var Session = require('../src/session').Session;
-var VideoRoomHandle = require('../src/plugins/videoroom/handle').VideoRoomHandle;
+var VideoRoomHandle = require('../src/plugins').VideoRoom;
 var assert = require('chai').assert;
 
 var mockServerPort = config.janus.server.port;
