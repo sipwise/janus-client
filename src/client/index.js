@@ -62,12 +62,13 @@ class Client {
         this.emitter = new EventEmitter();
         this.transactions = {};
         this.connectionTimeoutTimer = null;
-        this.connectionTimeout = options.connectionTimeout || 10000;
+        this.connectionTimeout = options.connectionTimeout || 40000;
         this.lastConnectionEvent = ClientEvent.disconnected;
         this.sessions = {};
         this.hasInfo = false;
         this.info = {};
         this.reconnect = _.isBoolean(options.reconnect)? options.reconnect : true;
+        this.token = _.get(options, 'token', null);
     }
 
     getVersion() {
@@ -232,6 +233,9 @@ class Client {
     }
 
     transact(req) {
+        if(this.token !== null) {
+            req.token = this.token;
+        }
         var transaction = new Transaction(req, (finalReq)=>{
             this.sendObject(finalReq).then(()=>{
 
