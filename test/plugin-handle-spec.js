@@ -87,11 +87,27 @@ describe('PluginHandle', function(){
         });
 
         it('should destroy a room', function(done) {
-            done();
+            handle.destroy(123).then(()=>{
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
         });
 
-        it('should check whether a room exists or not', function(done) {
-            done();
+        it('should fail while destroying a none existing room', function(done) {
+            handle.destroy(123).then(()=>{
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
+        });
+
+        it('should check whether a room exists', function(done) {
+            handle.exists(123).then(()=>{
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
         });
 
         it('should list all rooms', function(done) {

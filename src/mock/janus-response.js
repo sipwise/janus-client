@@ -1,6 +1,21 @@
 
 module.exports = {
 
+    error: {
+        general: {
+            unauthorized: function unauthorized(req) {
+                return {
+                    janus: 'error',
+                    transaction: req.transaction,
+                    error: {
+                        code: 403,
+                        reason: 'Unauthorized request (wrong or missing secret/token)'
+                    }
+                };
+            }
+        }
+    },
+
     general: {
         info: function info(req) {
             return {
@@ -142,6 +157,20 @@ module.exports = {
     },
 
     videoRoomHandle: {
+        error: {
+            destroy: function destroy(req) {
+                return { janus: 'success',
+                    session_id: req.session_id,
+                    sender: req.handle_id,
+                    transaction: req.transaction,
+                    plugindata:
+                    { plugin: 'janus.plugin.videoroom',
+                        data:
+                        { videoroom: 'event',
+                            error_code: 426,
+                            error: 'No such room (' + req.body.room + ')' } } };
+            }
+        },
         create: function create(req) {
             return { janus: 'success',
                 session_id: req.session_id,
@@ -158,10 +187,25 @@ module.exports = {
                 transaction: req.transaction,
                 plugindata:
                 { plugin: 'janus.plugin.videoroom',
-                    data: { videoroom: 'created', room: 2146929290 } } }
+                    data: { videoroom: 'destroyed', room: 2146929290 } } }
+        },
+        exists: function exists(req) {
+            return {
+                janus: 'success',
+                session_id: req.session_id,
+                sender: req.handle_id,
+                transaction: req.transaction,
+                plugindata: {
+                    plugin: 'janus.plugin.videoroom',
+                    data: {
+                        videoroom: 'success', room: 2146929290, exists: 'true'
+                    }
+                }
+            }
         },
         list: function list(req) {
-            return { janus: 'success',
+            return { 
+                janus: 'success',
                 session_id: req.session_id,
                 sender: req.handle_id,
                 transaction: req.transaction,

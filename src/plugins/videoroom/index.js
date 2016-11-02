@@ -1,5 +1,6 @@
 'use strict';
 
+var assert = require('chai').assert;
 var _ = require('lodash');
 var Promise = require('bluebird');
 var PluginHandle = require('../plugin-handle').PluginHandle;
@@ -26,8 +27,9 @@ class VideoRoomHandle extends PluginHandle {
             this.requestMessage({
                 request: 'create'
             }).then((res)=>{
+                assert.isNumber(res.getData().room, 'Missing room id in response');
                 resolve(new VideoRoom({
-                    room: _.get(res.getResponse(), 'plugindata.data.room', null)
+                    room: res.getData().room
                 }, this));
             }).catch((err)=>{
                 reject(err);
@@ -37,11 +39,26 @@ class VideoRoomHandle extends PluginHandle {
 
     destroy(room) {
         return new Promise((resolve, reject)=>{
+            assert.isNotNaN(parseInt(room));
             this.requestMessage({
                 request: 'destroy',
-                room: room
+                room: parseInt(room)
             }).then(()=>{
                 resolve();
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    exists(room) {
+        return new Promise((resolve, reject)=>{
+            assert.isNotNaN(parseInt(room));
+            this.requestMessage({
+                request: 'exists',
+                room: parseInt(room)
+            }).then((res)=>{
+                resolve(res.getData().exists);
             }).catch((err)=>{
                 reject(err);
             });
@@ -53,7 +70,7 @@ class VideoRoomHandle extends PluginHandle {
             this.requestMessage({
                 request: 'list'
             }).then((res)=>{
-                resolve(_.get(res.getResponse(), 'plugindata.data.list', []));
+                resolve(res.getData().list || []);
             }).catch((err)=>{
                 reject(err);
             });
@@ -62,6 +79,7 @@ class VideoRoomHandle extends PluginHandle {
 
     joinPublisher(room) {
         return new Promise((resolve, reject)=>{
+            assert.isNotNaN(parseInt(room));
             var transaction = this.transactMessage({
                 request: 'join',
                 ptype: 'publisher',

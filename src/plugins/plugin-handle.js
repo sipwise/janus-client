@@ -3,6 +3,8 @@
 var _ = require('lodash');
 var EventEmitter = require('events').EventEmitter;
 var JanusEvents = require('../constants').JanusEvents;
+var PluginError = require('../errors').PluginError;
+var PluginResponse = require('../client/response').PluginResponse;
 
 /**
  * @class
@@ -106,11 +108,17 @@ class PluginHandle {
 
     requestMessage(body, options) {
         return new Promise((resolve, reject)=>{
-            this.request({
+            var req = {
                 janus: 'message',
                 body: body
-            }, options).then((res)=>{
-                resolve(res);
+            };
+            this.request(req, options).then((res)=>{
+                var pluginResponse = new PluginResponse(res.getRequest(), res.getResponse());
+                if(pluginResponse.isError()) {
+                    reject(new PluginError(res, this));
+                } else {
+                    resolve(pluginResponse);
+                }
             }).catch((err)=>{
                 reject(err);
             });

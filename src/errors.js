@@ -1,5 +1,6 @@
 'use strict';
 
+var assert = require('chai').assert;
 var _ = require('lodash');
 
 /**
@@ -33,15 +34,16 @@ class ResponseError extends Error {
  */
 class PluginError extends ResponseError {
 
-    constructor(req, res, plugin) {
-        super(req, res);
+    constructor(res, handle) {
+        super(res);
+        assert(_.has(res.getResponse()))
         this.message = _.get(res, 'plugindata.data.error', null);
         this.code = _.get(res, 'plugindata.data.error_code', null);
-        this.plugin = plugin;
+        this.handle = handle;
     }
 
-    getPlugin() {
-        return this.plugin;
+    getHandle() {
+        return this.handle;
     }
 }
 
