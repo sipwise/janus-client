@@ -8,6 +8,7 @@ var VideoRoom = require('./room').VideoRoom;
 var PluginError = require('../../errors').PluginError;
 var logger = require('debug-logger')('janus:videoroom:handle');
 var Publisher = require('./publisher').Publisher;
+var Listener = require('./listener').Listener;
 
 /**
  * @class
