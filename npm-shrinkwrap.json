@@ -1,0 +1,62 @@
+{
+  "name": "janus-client",
+  "version": "1.0.0",
+  "dependencies": {
+    "bluebird": {
+      "version": "3.4.6",
+      "from": "bluebird@>=3.4.1 <4.0.0",
+      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.6.tgz"
+    },
+    "debug-logger": {
+      "version": "0.4.1",
+      "from": "debug-logger@>=0.4.1 <0.5.0",
+      "resolved": "https://registry.npmjs.org/debug-logger/-/debug-logger-0.4.1.tgz",
+      "dependencies": {
+        "debug": {
+          "version": "2.2.0",
+          "from": "debug@>=2.1.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-2.2.0.tgz",
+          "dependencies": {
+            "ms": {
+              "version": "0.7.1",
+              "from": "ms@0.7.1",
+              "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.1.tgz"
+            }
+          }
+        }
+      }
+    },
+    "lodash": {
+      "version": "4.16.6",
+      "from": "lodash@>=4.14.1 <5.0.0",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.6.tgz"
+    },
+    "uuid": {
+      "version": "2.0.3",
+      "from": "uuid@>=2.0.2 <3.0.0",
+      "resolved": "https://registry.npmjs.org/uuid/-/uuid-2.0.3.tgz"
+    },
+    "validator": {
+      "version": "6.1.0",
+      "from": "validator@>=6.1.0 <7.0.0",
+      "resolved": "https://registry.npmjs.org/validator/-/validator-6.1.0.tgz"
+    },
+    "ws": {
+      "version": "1.1.1",
+      "from": "ws@>=1.1.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/ws/-/ws-1.1.1.tgz",
+      "dependencies": {
+        "options": {
+          "version": "0.0.6",
+          "from": "options@>=0.0.5",
+          "resolved": "https://registry.npmjs.org/options/-/options-0.0.6.tgz"
+        },
+        "ultron": {
+          "version": "1.0.2",
+          "from": "ultron@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/ultron/-/ultron-1.0.2.tgz"
+        }
+      }
+    }
+  }
+}
