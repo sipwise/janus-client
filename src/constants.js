@@ -3,5 +3,6 @@ module.exports.JanusEvents = {
     webrtcup: 'webrtcup',
     media: 'media',
     hangup: 'hangup',
-    timeout: 'timeout'
+    timeout: 'timeout',
+    event: 'event'
 };

@@ -9,6 +9,8 @@ var _ = require('lodash');
 class ClientResponse {
 
     constructor(req, res) {
+        assert.property(req, 'janus', 'Missing property janus in request');
+        assert.property(res, 'janus', 'Missing property janus in response');
         this.request = req;
         this.response = res;
     }

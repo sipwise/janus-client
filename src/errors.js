@@ -36,9 +36,10 @@ class PluginError extends ResponseError {
 
     constructor(res, handle) {
         super(res);
-        assert(_.has(res.getResponse()))
-        this.message = _.get(res, 'plugindata.data.error', null);
-        this.code = _.get(res, 'plugindata.data.error_code', null);
+        assert(_.has(res.getResponse(), 'plugindata.data.error'));
+        assert(_.has(res.getResponse(), 'plugindata.data.error_code'));
+        this.message = _.get(res.getResponse(), 'plugindata.data.error', null);
+        this.code = _.get(res.getResponse(), 'plugindata.data.error_code', null);
         this.handle = handle;
     }
 

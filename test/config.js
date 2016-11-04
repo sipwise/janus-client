@@ -1,5 +1,5 @@
 
-process.env.DEBUG = '*';
+process.env.DEBUG = '';
 
 var mockServerPort = 9000;
 

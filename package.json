@@ -3,22 +3,21 @@
   "version": "1.0.0",
   "main": "src/janus.js",
   "scripts": {
-    "test": "mocha -R spec --ui bdd --full-trace test/*-spec.js"
+    "test": "mocha -R spec --full-trace test/*-spec.js"
   },
   "author": "Hans-Peter Herzog <hherzog@sipwise.com>",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "bluebird": "^3.4.1",
+    "chai": "^3.5.0",
     "debug-logger": "^0.4.1",
     "lodash": "^4.14.1",
     "uuid": "^2.0.2",
     "validator": "^6.1.0",
-    "ws": "^1.1.1"
+    "ws": "https://registry.npmjs.org/ws/-/ws-1.1.1.tgz"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.0.1",
-    "ws": "^1.1.1"
+    "mocha": "^3.0.1"
   }
 }

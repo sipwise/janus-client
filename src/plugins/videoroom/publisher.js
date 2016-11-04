@@ -13,8 +13,7 @@ class Publisher extends VideoRoomParticipant {
 
     constructor(options) {
         super(options);
-        this.id = options.id;
-        this.emitter = new EventEmitter();
+        this.id = null;
         this.listeners = {};
     }
 
@@ -61,6 +60,10 @@ class Publisher extends VideoRoomParticipant {
 
     onJoined(listener) {
         this.emitter.on('joined', listener);
+    }
+
+    onLeft(listener) {
+        this.emitter.on('left', listener);
     }
 }
 

@@ -10,66 +10,135 @@ var request = {
     janus: 'foo'
 };
 
-var defaultHandler = function() {
-    console.log('Handler called');
+var clientMock = {
+    sendObject: function sendObject(obj) {
+        return new Promise((resolve, reject)=>{
+            resolve();
+        });
+    }
 };
 
 describe('Transaction', function(){
 
     it('should create a random transaction id', function(){
-        var transaction = new Transaction(request, defaultHandler);
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock
+        });
         assert.deepEqual(validator.isUUID(transaction.getId()), true);
     });
 
     it('should add id to request object', function(){
-        var transaction = new Transaction(request, defaultHandler);
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock
+        });
         assert.property(transaction.getRequest(), 'transaction');
         assert.equal(transaction.getRequest().transaction, transaction.getId());
     });
 
     it('should has initial state of new', function(){
-        var transaction = new Transaction(request, defaultHandler);
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock
+        });
         assert.equal(transaction.getState(), 'new');
     });
 
-    it('should start and call the main handler', function(done){
-        var transaction = new Transaction(request, function(request){
-            assert.deepEqual(request, transaction.getRequest());
-            done();
+    it('should start and send the object', function(done){
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock
         });
-        transaction.start();
+        transaction.onSent(()=>{
+            done();
+        }).start();
     });
 
-    it('should throw timeout error after no response', function(done){
+    it('should receive response', function(done){
+
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock
+        });
+        var response = {
+            janus: 'success',
+            transaction: transaction.getId()
+        };
+        transaction.onSent(()=>{
+            transaction.response(new ClientResponse(request, response));
+        }).onResponse((res)=>{
+            assert.equal(transaction.getState(), 'ended');
+            assert.deepEqual(res.getResponse(), response);
+            done();
+        }).start();
+    });
+
+    it('should receive nothing and timeout', function(done){
 
         var timeout = 500;
-        var transaction = new Transaction(request, function(request){
-            assert.deepEqual(request, transaction.getRequest());
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock,
+            timeout: timeout
         });
         this.timeout(timeout + 500);
         transaction.onError(function(err){
+            assert.equal(transaction.getState(), 'ended');
             assert.instanceOf(err, TransactionTimeoutError);
             done();
-        });
-        transaction.timeout(timeout).start();
+        }).start();
     });
 
-    it('should receive a single response', function(done){
+    it('should receive ack and response', function(done){
 
-        var clientResponse = null;
-        var timeout = 3000;
-        var transaction = new Transaction(request, function(request){
-            assert.deepEqual(request, transaction.getRequest());
-            clientResponse = new ClientResponse(request, {
-                transaction: transaction.getId()
-            });
-            transaction.response(clientResponse);
+        var ack = true;
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock,
+            ack: true
         });
-        this.timeout(timeout + 500);
-        transaction.onResponse(function(response){
-            assert.deepEqual(clientResponse, response);
+        var response = {
+            janus: 'success',
+            transaction: transaction.getId()
+        };
+        transaction.onSent(()=>{
+            transaction.response(new ClientResponse(request, response));
+        }).onAck(()=>{
+            ack = true;
+        }).onResponse((res)=>{
+            assert.equal(transaction.getState(), 'ended');
+            assert.deepEqual(res.getResponse(), response);
+            assert.isTrue(ack);
             done();
+        }).start();
+    });
+
+    it('should receive ack and timeout', function(done){
+
+        var ack = false;
+        var timeout = 500;
+        this.timeout(timeout + 500);
+
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock,
+            timeout: timeout,
+            ack: true
         });
-        transaction.timeout(timeout).start();
+        var response = {
+            janus: 'ack',
+            transaction: transaction.getId()
+        };
+        transaction.onSent(()=>{
+            transaction.response(new ClientResponse(request, response));
+        }).onAck(()=>{
+            ack = true;
+        }).onError(function(err){
+            assert.equal(transaction.getState(), 'ended');
+            assert.instanceOf(err, TransactionTimeoutError);
+            assert.isTrue(ack);
+            done();
+        }).start();
     });
 });

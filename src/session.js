@@ -62,12 +62,6 @@ class Session {
         }
     }
 
-    transact(obj) {
-        this.startKeepAlive();
-        obj.session_id = this.id;
-        return this.janus.transact(obj);
-    }
-
     request(obj, options) {
         this.startKeepAlive();
         obj.session_id = this.id;
@@ -137,8 +131,8 @@ class Session {
     }
 
     event(event) {
-        if(event.sender && _.isObject(this.pluginHandles[event.sender])) {
-            this.pluginHandles[event.sender].emitEvent(event);
+        if(_.has(event, 'sender') && _.isObject(this.pluginHandles[event.sender])) {
+            this.pluginHandles[event.sender].event(event);
         } else {
             this.emitter.emit('event', event);
         }

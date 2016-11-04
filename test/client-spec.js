@@ -44,6 +44,9 @@ describe('Client', function() {
             assert.equal(client.getConnectionState(), ConnectionState.connected);
             done();
         });
+        client.onError((err)=>{
+            done(err);
+        });
         client.connect();
     });
 
@@ -133,12 +136,16 @@ describe('Client', function() {
             url: mockServerUrl
         });
         client.onConnected(()=>{
-            client.transact({
-                janus: 'create'
+            client.createTransaction({
+                request: {
+                    janus: 'create'
+                },
+                client: client,
+                ack: false
             }).onResponse((res)=>{
                 assert.equal(res.isSuccess(), true);
                 done();
-            }).timeout(1000).start();
+            }).start();
         });
         client.connect();
     });

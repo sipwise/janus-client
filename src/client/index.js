@@ -69,6 +69,7 @@ class Client {
         this.info = {};
         this.reconnect = _.isBoolean(options.reconnect)? options.reconnect : true;
         this.token = _.get(options, 'token', null);
+        this.apiSecret = _.get(options, 'apiSecret', null);
     }
 
     getVersion() {
@@ -187,7 +188,7 @@ class Client {
             response = new ClientResponse(transaction.getRequest(), obj);
             transaction.response(response);
         } else if (transactionId !== null) {
-            logger.info('Dropped response, because transaction does not exists', obj);
+            logger.warn('Dropped response, because transaction does not exists', obj);
         } else {
             this.delegateEvent(obj);
         }
@@ -232,38 +233,33 @@ class Client {
         });
     }
 
-    transact(req) {
+    createTransaction(options) {
         if(this.token !== null) {
-            req.token = this.token;
+            options.request.token = this.token;
         }
-        var transaction = new Transaction(req, (finalReq)=>{
-            this.sendObject(finalReq).then(()=>{
-
-            }).catch((err)=>{
-                transaction.error(err);
-            });
-        });
+        if(this.apiSecret !== null) {
+            options.apisecret = this.apiSecret;
+        }
+        var transaction = new Transaction(options);
         this.transactions[transaction.getId()] = transaction;
-        transaction.onEnd(()=>{
-            delete this.transactions[transaction.getId()];
-        });
         return transaction;
     }
 
     request(req, options) {
         return new Promise((resolve, reject)=>{
-            var options = options || {};
-            var requestTimeout = options.requestTimeout || this.requestTimeout;
-            var transaction = this.transact(req).onAck((res)=>{
-                transaction.end();
+            var ack = _.get(options, 'ack', false);
+            var transaction = this.createTransaction({
+                request: req,
+                client: this,
+                ack: ack
+            });
+            transaction.onResponse((res)=>{
                 resolve(res);
-            }).onResponse((res)=>{
-                transaction.end();
-                resolve(res);
-            }).onError(function(err){
-                transaction.offError(this.constructor);
+            }).onError((err)=>{
                 reject(err);
-            }).timeout(requestTimeout).start();
+            }).onEnd(()=>{
+                delete this.transactions[transaction.getId()];
+            }).start();
         });
     }
 
@@ -343,32 +339,16 @@ class Client {
         this.emitter.on(ClientEvent.connected, listener);
     }
 
-    offConnected(listener) {
-        this.emitter.removeListener(ClientEvent.connected, listener);
-    }
-
     onDisconnected(listener) {
         this.emitter.on(ClientEvent.disconnected, listener);
-    }
-
-    offDisconnected(listener) {
-        this.emitter.removeListener(ClientEvent.disconnected, listener);
     }
 
     onError(listener) {
         this.emitter.on(ClientEvent.error, listener);
     }
 
-    offError(listener) {
-        this.emitter.removeListener(ClientEvent.error, listener);
-    }
-
     onEvent(listener) {
         this.emitter.on(ClientEvent.event, listener);
-    }
-
-    offEvent(listener) {
-        this.emitter.removeListener(ClientEvent.event, listener);
     }
 }
 

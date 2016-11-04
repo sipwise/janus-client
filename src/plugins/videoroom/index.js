@@ -81,97 +81,74 @@ class VideoRoomHandle extends PluginHandle {
     joinPublisher(room) {
         return new Promise((resolve, reject)=>{
             assert.isNotNaN(parseInt(room));
-            var transaction = this.transactMessage({
+            this.requestMessage({
                 request: 'join',
                 ptype: 'publisher',
                 room: room
-            }).onResponse((res)=>{
-                var videoRoom = _.get(res.getResponse(), 'plugindata.data.videoroom', null);
-                var errorCode = _.get(res.getResponse(), 'plugindata.data.error', null);
-                if(errorCode !== null) {
-                    reject(new PluginError(transaction.getRequest(), res.getResponse(), this));
-                } else if(videoRoom === 'joined') {
-                    resolve(res.getResponse());
-                } else {
-                    reject(new Error('Unknown response'));
-                }
-            }).start();
+            }, {
+                ack: true
+            }).then((res)=>{
+                resolve(res.getResponse());
+            }).catch((err)=>{
+                reject(err);
+            });
         });
     }
 
     joinListener(room, feed) {
         return new Promise((resolve, reject)=>{
-            var transaction = this.transactMessage({
+            assert.isNotNaN(parseInt(room));
+            assert.isNotNaN(parseInt(feed));
+            this.requestMessage({
                 request: 'join',
                 ptype: 'listener',
                 room: room,
                 feed: feed
-            }).onResponse((res)=>{
-                var videoRoom = _.get(res.getResponse(), 'plugindata.data.videoroom', null);
-                var errorCode = _.get(res.getResponse(), 'plugindata.data.error', null);
-                if(errorCode !== null) {
-                    reject(new PluginError(transaction.getRequest(), res.getResponse(), this));
-                } else if(videoRoom === 'attached') {
-                    resolve(res.getResponse());
-                } else {
-                    reject(new Error('Unknown response'));
-                }
-            }).start();
+            }, {
+                ack: true
+            }).then((res)=>{
+                resolve(res.getResponse());
+            }).catch((err)=>{
+                reject(err);
+            });
         });
     }
 
     configure(options) {
         return new Promise((resolve, reject)=>{
-
+            assert.property(options, 'jsep', 'Missing option jsep');
             var audio = _.get(options, 'audio', true);
             var video = _.get(options, 'video', true);
-
-            var jsep = _.get(options, 'jsep', null);
-            if(jsep === null) {
-                throw new Error('Missing argument jsep');
-            }
-
-            var transaction = this.transactJsepMessage({
+            this.requestMessage({
                 request: 'configure',
                 audio: audio,
                 video: video
-            }, options.jsep).onResponse((res)=>{
-                var configured = _.get(res.getResponse(), 'plugindata.data.configured', null);
-                var errorCode = _.get(res.getResponse(), 'plugindata.data.error', null);
-                if(errorCode !== null) {
-                    reject(new PluginError(transaction.getRequest(), res.getResponse(), this));
-                } else if(configured === 'ok') {
-                    resolve(res.getResponse());
-                } else {
-                    reject(new Error('Unknown response'));
-                }
-            }).start();
+            }, {
+                ack: true,
+                jsep: options.jsep
+            }).then((res)=>{
+                resolve(res.getResponse());
+            }).catch((err)=>{
+                reject(err);
+            });
         });
     }
 
     start(options) {
         return new Promise((resolve, reject)=>{
-
-            var jsep = _.get(options, 'jsep', null);
-            if(jsep === null) {
-                throw new Error('Missing argument jsep');
-            }
-
-            var transaction = this.transactJsepMessage({
+            assert.property(options, 'jsep', 'Missing option jsep');
+            this.requestMessage({
                 request: 'start',
                 room: options.room,
                 feed: options.feed
-            }, options.jsep).onResponse((res)=>{
-                var started = _.get(res.getResponse(), 'plugindata.data.started', null);
-                var errorCode = _.get(res.getResponse(), 'plugindata.data.error', null);
-                if(errorCode !== null) {
-                    reject(new PluginError(transaction.getRequest(), res.getResponse(), this));
-                } else if(started === 'ok') {
-                    resolve(res.getResponse());
-                } else {
-                    reject(new Error('Unknown response'));
-                }
-            }).start();
+            }, {
+                ack: true,
+                jsep: options.jsep
+            }).then((res)=>{
+                resolve(res.getResponse());
+            }).catch((err)=>{
+                reject(err);
+            });
         });
     }
 
@@ -216,9 +193,10 @@ class VideoRoomHandle extends PluginHandle {
 
     createPublisher(room) {
         return new Promise((resolve, reject)=>{
+            assert.isNotNaN(parseInt(room));
             var publisher = new Publisher({
                 session: this.session,
-                room: room
+                room: parseInt(room)
             });
             publisher.init().then(()=>{
                 resolve(publisher);
@@ -230,10 +208,12 @@ class VideoRoomHandle extends PluginHandle {
 
     createListener(room, feed) {
         return new Promise((resolve, reject)=>{
+            assert.isNotNaN(parseInt(room));
+            assert.isNotNaN(parseInt(feed));
             var listener = new Listener({
                 session: this.session,
-                room: room,
-                feed: feed
+                room: parseInt(room),
+                feed: parseInt(feed)
             });
             listener.init().then(()=>{
                 resolve(listener);

@@ -5,6 +5,7 @@ var EventEmitter = require('events').EventEmitter;
 var JanusEvents = require('../constants').JanusEvents;
 var PluginError = require('../errors').PluginError;
 var PluginResponse = require('../client/response').PluginResponse;
+var logger = require('debug-logger')('janus:handle');
 
 /**
  * @class
@@ -53,19 +54,23 @@ class PluginHandle {
         });
     }
 
-    emitEvent(event) {
-
+    event(event) {
         switch(event.janus) {
             case JanusEvents.webrtcup:
-                this.emitter.emit(JanusEvents.webrtcup);
+                this.emitter.emit(JanusEvents.webrtcup, event);
                 break;
             case JanusEvents.media:
-                this.emitter.emit(JanusEvents.media);
+                this.emitter.emit(JanusEvents.media, event);
                 break;
             case JanusEvents.hangup:
-                this.emitter.emit(JanusEvents.hangup);
+                this.emitter.emit(JanusEvents.hangup, event);
+                break;
+            case JanusEvents.event:
+                this.emitter.emit(JanusEvents.event, event);
                 break;
             default:
+                logger.warn('Dropped unknown handle event', event);
+                break;
         }
     }
 
@@ -81,9 +86,8 @@ class PluginHandle {
         this.emitter.addListener(JanusEvents.hangup, listener);
     }
 
-    transact(obj) {
-        obj.handle_id = this.getId();
-        return this.session.transact(obj);
+    onEvent(listener) {
+        this.emitter.addListener(JanusEvents.event, listener);
     }
 
     request(obj, options) {
@@ -91,27 +95,17 @@ class PluginHandle {
         return this.session.request(obj, options);
     }
 
-    transactJsepMessage(body, jsep) {
-        return this.transact({
-            janus: 'message',
-            body: body,
-            jsep: jsep
-        });
-    }
-
-    transactMessage(body) {
-        return this.transact({
-            janus: 'message',
-            body: body
-        });
-    }
-
     requestMessage(body, options) {
         return new Promise((resolve, reject)=>{
+            options = options || {};
             var req = {
                 janus: 'message',
                 body: body
             };
+            if(_.isObject(options.jsep)) {
+                req.jsep = options.jsep;
+                delete options.jsep;
+            }
             this.request(req, options).then((res)=>{
                 var pluginResponse = new PluginResponse(res.getRequest(), res.getResponse());
                 if(pluginResponse.isError()) {

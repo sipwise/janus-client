@@ -11,11 +11,13 @@ var ClientResponse = require('./client/response').ClientResponse;
 var State = {
     new: 'new',
     started: 'started',
+    sent: 'sent',
     ended: 'ended'
 };
 
 var Event = {
     response: 'response',
+    ack: 'ack',
     end: 'end',
     error: 'error'
 };
@@ -23,11 +25,12 @@ var Event = {
 /**
  * @class
  */
-class InvalidTransactionState {
+class InvalidTransactionState extends Error {
 
     constructor(transaction) {
+        super();
         this.name = this.constructor.name;
-        this.message = 'Invalid transaction state';
+        this.message = 'Invalid transaction state ' + this.transaction.getState();
         this.transaction = transaction;
         this.state = transaction.getState();
     }
@@ -36,11 +39,12 @@ class InvalidTransactionState {
 /**
  * @class
  */
-class TransactionTimeoutError {
+class TransactionTimeoutError extends Error {
 
     constructor(transaction, timeout) {
+        super();
         this.name = this.constructor.name;
-        this.message = 'Transaction timeout';
+        this.message = 'Transaction timeout ' + timeout;
         this.transaction = transaction;
         this.timeout = timeout;
     }
@@ -51,19 +55,18 @@ class TransactionTimeoutError {
  */
 class Transaction {
 
-    constructor(request, handler) {
-        assert.property(request, 'janus');
-        assert.isFunction(handler);
-
+    constructor(options) {
+        assert.property(options, 'request');
+        assert.property(options, 'client');
+        assert.property(options.request, 'janus');
         this.id = createId();
-        this.request = _.isObject(request)? request : {};
+        this.request = options.request;
+        this.client = options.client;
         this.emitter = new EventEmitter();
-        this.handler = handler;
         this.state = State.new;
         this.timeoutTimer = null;
-        this.timeoutMilli = 6000;
-        this.useTimeout = false;
-        this.acknowledged = false;
+        this.timeout = _.get(options, 'timeout', 12000);
+        this.ack = _.get(options, 'ack', false);
         _.set(this.request, 'transaction', this.id);
     }
 
@@ -79,17 +82,18 @@ class Transaction {
         return this.state;
     }
 
-    getTimeoutMilli() {
-        return this.timeoutMilli;
-    }
-
     start() {
         if(this.state === State.new) {
             this.state = State.started;
             this.startTimeout();
-            this.handler(this.getRequest());
+            this.client.sendObject(this.getRequest()).then(()=>{
+                this.state = State.sent;
+                this.emitter.emit('sent', this.getRequest());
+            }).catch((err)=>{
+                this.error(err);
+            });
         } else {
-            throw new InvalidTransactionState(this);
+            this.error(new InvalidTransactionState(this));
         }
         return this;
     }
@@ -98,34 +102,37 @@ class Transaction {
         assert.instanceOf(res, ClientResponse);
         assert.property(res.getResponse(), 'transaction', 'Missing transaction id');
         assert.equal(res.getResponse().transaction, this.getId(), 'Invalid transaction id');
-        if(this.state === State.started) {
-            this.startTimeout();
+        if(this.state === State.sent) {
             if(res.isError()) {
                 this.error(new ResponseError(res));
-            } else if(res.isAck()) {
-                this.acknowledged = true;
-                this.emitter.emit('ack');
+            } else if(this.ack && res.isAck()) {
+                this.startTimeout();
+                this.emitter.emit(Event.ack, res);
             } else {
+                this.end();
                 this.emitter.emit(Event.response, res);
             }
         } else {
-            throw new InvalidTransactionState(this);
+            this.error(new InvalidTransactionState(this));
         }
     }
 
     end() {
+        this.stopTimeout();
         if(this.state !== State.ended) {
             this.state = State.ended;
-            this.stopTimeout();
             this.emitter.emit(Event.end);
-        } else {
-            throw new InvalidTransactionState(this);
         }
     }
 
     error(err) {
         this.end();
         this.emitter.emit(Event.error, err);
+    }
+
+    onSent(listener) {
+        this.emitter.on('sent', listener);
+        return this;
     }
 
     onAck(listener) {
@@ -138,18 +145,8 @@ class Transaction {
         return this;
     }
 
-    offResponse(listener) {
-        this.emitter.removeListener(Event.response, listener);
-        return this;
-    }
-
     onEnd(listener) {
         this.emitter.on(Event.end, listener);
-        return this;
-    }
-
-    offEnd(listener) {
-        this.emitter.removeListener(Event.end, listener);
         return this;
     }
 
@@ -158,38 +155,21 @@ class Transaction {
         return this;
     }
 
-    offError(listener) {
-        this.emitter.removeListener(Event.error, listener);
-        return this;
-    }
-
-    timeout(timeout) {
-        if(this.state === State.new) {
-            this.useTimeout = true;
-            this.timeoutMilli = timeout;
-        } else {
-            throw new InvalidTransactionState(this);
-        }
-        return this;
+    getTimeout() {
+        return this.timeout;
     }
 
     startTimeout() {
-        if(this.useTimeout) {
-            this.stopTimeout();
-            this.timeoutTimer = setTimeout(()=> {
-                this.error(new TransactionTimeoutError(this, this.timeoutMilli));
-            }, this.timeoutMilli);
-        }
+        this.stopTimeout();
+        this.timeoutTimer = setTimeout(()=> {
+            this.error(new TransactionTimeoutError(this, this.getTimeout()));
+        }, this.getTimeout());
     }
 
     stopTimeout() {
         if(this.timeoutTimer !== null) {
             clearTimeout(this.timeoutTimer);
         }
-    }
-
-    isAcknowledged() {
-        return this.acknowledged;
     }
 }
 
