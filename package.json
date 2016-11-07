@@ -1,13 +1,16 @@
 {
-  "name": "janus-client",
+  "name": "janus-videoroom-client",
   "version": "1.0.1",
   "main": "src/janus.js",
   "scripts": {
     "test": "mocha -R spec --full-trace test/*-spec.js"
   },
   "author": "Hans-Peter Herzog <hherzog@sipwise.com>",
-  "license": "ISC",
+  "license": "GPL-3.0",
   "description": "",
+"keywords": [
+    "janus"
+],
   "dependencies": {
     "bluebird": "^3.4.1",
     "chai": "^3.5.0",
