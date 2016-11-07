@@ -1,6 +1,6 @@
 {
   "name": "janus-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/janus.js",
   "scripts": {
     "test": "mocha -R spec --full-trace test/*-spec.js"
@@ -15,7 +15,7 @@
     "lodash": "^4.14.1",
     "uuid": "^2.0.2",
     "validator": "^6.1.0",
-    "ws": "https://registry.npmjs.org/ws/-/ws-1.1.1.tgz"
+    "ws": "^1.1.1"
   },
   "devDependencies": {
     "mocha": "^3.0.1"

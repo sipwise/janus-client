@@ -1,6 +1,6 @@
 {
   "name": "janus-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dependencies": {
     "bluebird": {
       "version": "3.4.6",
@@ -72,7 +72,7 @@
     },
     "ws": {
       "version": "1.1.1",
-      "from": "https://registry.npmjs.org/ws/-/ws-1.1.1.tgz",
+      "from": "ws@latest",
       "resolved": "https://registry.npmjs.org/ws/-/ws-1.1.1.tgz",
       "dependencies": {
         "options": {
