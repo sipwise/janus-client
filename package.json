@@ -1,6 +1,6 @@
 {
   "name": "janus-videoroom-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "src/janus.js",
   "scripts": {
     "test": "mocha -R spec --full-trace test/*-spec.js"
@@ -8,9 +8,13 @@
   "author": "Hans-Peter Herzog <hherzog@sipwise.com>",
   "license": "GPL-3.0",
   "description": "",
-"keywords": [
+  "keywords": [
     "janus"
-],
+  ],
+    "repository" : {
+        "type" : "git",
+        "url" : "https://github.com/sipwise/janus-client.git"
+    },
   "dependencies": {
     "bluebird": "^3.4.1",
     "chai": "^3.5.0",
