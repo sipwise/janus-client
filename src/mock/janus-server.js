@@ -114,6 +114,13 @@ class JanusServer {
             case 'exists':
                 this.send(webSocket, JanusResponse.videoRoomHandle.exists(object));
                 break;
+            case 'listparticipants':
+                this.send(webSocket, JanusResponse.videoRoomHandle.listParticipants(object));
+                break;
+            case 'join':
+                this.send(webSocket, JanusResponse.general.ack(object));
+                this.send(webSocket, JanusResponse.videoRoomHandle.join(object));
+                break;
         }
     }
 

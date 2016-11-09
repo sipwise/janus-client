@@ -10,6 +10,25 @@ var logger = require('debug-logger')('janus:videoroom:handle');
 var Publisher = require('./publisher').Publisher;
 var Listener = require('./listener').Listener;
 
+var ParticipantType = {
+    publisher: 'publisher',
+    listener: 'listener'
+};
+
+var AudioCodec = {
+    opus: 'opus',
+    isac32: 'isac32',
+    isac16: 'isac16',
+    pcmu: 'pcmu',
+    pcma: 'pcma'
+};
+
+var VideoCodec = {
+    vp8: 'vp8',
+    vp9: 'vp9',
+    h264: 'h264'
+};
+
 /**
  * @class
  */
@@ -23,43 +42,50 @@ class VideoRoomHandle extends PluginHandle {
         super(options.id, options.session);
     }
 
-    create() {
+    create(options) {
         return new Promise((resolve, reject)=>{
-            this.requestMessage({
+            options = options || {};
+            var message = _.merge({
                 request: 'create'
-            }).then((res)=>{
-                assert.isNumber(res.getData().room, 'Missing room id in response');
-                resolve(new VideoRoom({
-                    room: res.getData().room
-                }, this));
+            }, options);
+            this.requestMessage(message).then((res)=>{
+                resolve({
+                    room: res.getData().room,
+                    response: res
+                });
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    destroy(room) {
+    destroy(options) {
         return new Promise((resolve, reject)=>{
-            assert.isNotNaN(parseInt(room));
-            this.requestMessage({
-                request: 'destroy',
-                room: parseInt(room)
-            }).then(()=>{
-                resolve();
+            assert.property(options, 'room');
+            var message = _.merge({
+                request: 'destroy'
+            }, options);
+            this.requestMessage(message).then((res)=>{
+                resolve({
+                    response: res
+                });
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    exists(room) {
+    exists(options) {
         return new Promise((resolve, reject)=>{
-            assert.isNotNaN(parseInt(room));
-            this.requestMessage({
-                request: 'exists',
-                room: parseInt(room)
-            }).then((res)=>{
-                resolve(res.getData().exists);
+            assert.property(options, 'room');
+            var message = _.merge({
+                request: 'exists'
+            }, options);
+            this.requestMessage(message).then((res)=>{
+                resolve({
+                    exists: res.getData().exists,
+                    response: res
+                });
             }).catch((err)=>{
                 reject(err);
             });
@@ -71,43 +97,81 @@ class VideoRoomHandle extends PluginHandle {
             this.requestMessage({
                 request: 'list'
             }).then((res)=>{
-                resolve(res.getData().list || []);
+                resolve({
+                    list: res.getData().list || [],
+                    response: res
+                });
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    joinPublisher(room) {
+    listParticipants(options) {
         return new Promise((resolve, reject)=>{
-            assert.isNotNaN(parseInt(room));
-            this.requestMessage({
-                request: 'join',
-                ptype: 'publisher',
-                room: room
-            }, {
-                ack: true
-            }).then((res)=>{
-                resolve(res.getResponse());
+            assert.property(options, 'room');
+            var message = _.merge({
+                request: 'listparticipants'
+            }, options);
+            this.requestMessage(message).then((res)=>{
+                resolve({
+                    participants: res.getData().participants || [],
+                    response: res
+                });
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    joinListener(room, feed) {
+    join(options) {
         return new Promise((resolve, reject)=>{
-            assert.isNotNaN(parseInt(room));
-            assert.isNotNaN(parseInt(feed));
-            this.requestMessage({
-                request: 'join',
-                ptype: 'listener',
-                room: room,
-                feed: feed
-            }, {
+            assert.property(options, 'room');
+            assert.property(options, 'ptype');
+            var message = _.merge({
+                request: 'join'
+            }, options);
+            this.requestMessage(message, {
                 ack: true
             }).then((res)=>{
-                resolve(res.getResponse());
+                resolve({
+                    id: res.getData().id,
+                    jsep: res.getJsep(),
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    joinPublisher(options) {
+        return new Promise((resolve, reject)=>{
+            assert.property(options, 'room');
+            var joinOptions = _.merge({
+                ptype: ParticipantType.publisher
+            }, options);
+            this.join(joinOptions, {
+                ack: true
+            }).then((res)=>{
+                resolve(res);
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    joinListener(options) {
+        return new Promise((resolve, reject)=>{
+            assert.property(options, 'room');
+            assert.property(options, 'feed');
+            var joinOptions = _.merge({
+                ptype: ParticipantType.listener
+            }, options);
+            this.join(joinOptions, {
+                ack: true
+            }).then((res)=>{
+                resolve(res);
             }).catch((err)=>{
                 reject(err);
             });
@@ -116,36 +180,42 @@ class VideoRoomHandle extends PluginHandle {
 
     configure(options) {
         return new Promise((resolve, reject)=>{
-            assert.property(options, 'jsep', 'Missing option jsep');
-            var audio = _.get(options, 'audio', true);
-            var video = _.get(options, 'video', true);
-            this.requestMessage({
-                request: 'configure',
-                audio: audio,
-                video: video
-            }, {
-                ack: true,
-                jsep: options.jsep
+            options.audio = _.get(options, 'audio', true);
+            options.video = _.get(options, 'video', true);
+            var message = _.merge({
+                request: 'configure'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
             }).then((res)=>{
-                resolve(res.getResponse());
+                resolve({
+                    response: res
+                });
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    start(options) {
+    joinAndConfigure(options) {
         return new Promise((resolve, reject)=>{
-            assert.property(options, 'jsep', 'Missing option jsep');
-            this.requestMessage({
-                request: 'start',
-                room: options.room,
-                feed: options.feed
-            }, {
-                ack: true,
-                jsep: options.jsep
+            assert.property(options, 'room');
+            assert.property(options, 'jsep');
+            options.audio = _.get(options, 'audio', true);
+            options.video = _.get(options, 'video', true);
+            var message = _.merge({
+                request: 'joinandconfigure',
+                ptype: 'publisher'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
             }).then((res)=>{
-                resolve(res.getResponse());
+                resolve({
+                    id: res.getData().id,
+                    jsep: res.getJsep(),
+                    publishers: res.getData().publishers,
+                    response: res
+                });
             }).catch((err)=>{
                 reject(err);
             });
@@ -154,23 +224,15 @@ class VideoRoomHandle extends PluginHandle {
 
     publish(options) {
         return new Promise((resolve, reject)=>{
-            var joinResult = null;
-            var room = _.get(options, 'room', null);
-            if(room === null) {
-                throw new Error('Missing argument room');
-            }
-            this.joinPublisher(options.room).then((res)=>{
-                joinResult = res;
-                return this.configure({
-                    audio: options.audio,
-                    video: options.video,
-                    jsep: options.jsep
-                });
+            assert.property(options, 'jsep');
+            var message = _.merge({
+                request: 'publish'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
             }).then((res)=>{
                 resolve({
-                    id: _.get(joinResult, 'plugindata.data.id', null),
-                    publishers: _.get(joinResult, 'plugindata.data.publishers', []),
-                    answer: _.get(res, 'jsep.sdp', null)
+                    response: res
                 });
             }).catch((err)=>{
                 reject(err);
@@ -178,17 +240,168 @@ class VideoRoomHandle extends PluginHandle {
         });
     }
 
-    listen(options) {
+    unpublish(options) {
         return new Promise((resolve, reject)=>{
-            this.joinListener(options.room, options.feed).then((joinResult)=>{
+            var message = _.merge({
+                request: 'unpublish'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
                 resolve({
-                    id: _.get(joinResult, 'plugindata.data.id', null),
-                    offer: _.get(joinResult, 'jsep.sdp', null)
+                    response: res
                 });
             }).catch((err)=>{
                 reject(err);
             });
         });
+    }
+
+    start(options) {
+        return new Promise((resolve, reject)=>{
+            assert.property(options, 'room');
+            assert.property(options, 'jsep');
+            var message = _.merge({
+                request: 'start'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
+                resolve({
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    /**
+     * Note: Documented at https://janus.conf.meetecho.com/docs/janus__videoroom_8c.html,
+     * but get error "423 Unknown request".
+     * @deprecated
+     */
+    pause(options) {
+        return new Promise((resolve, reject)=>{
+            var message = _.merge({
+                request: 'pause'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
+                resolve({
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    switch(options) {
+        return new Promise((resolve, reject)=>{
+            var message = _.merge({
+                request: 'switch'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
+                resolve({
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    /**
+     * Note: Documented at https://janus.conf.meetecho.com/docs/janus__videoroom_8c.html,
+     * but get error "423 Unknown request".
+     * @deprecated
+     */
+    stop(options) {
+        return new Promise((resolve, reject)=>{
+            var message = _.merge({
+                request: 'stop'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
+                resolve({
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    add(options) {
+        return new Promise((resolve, reject)=>{
+            var message = _.merge({
+                request: 'add'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
+                resolve({
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    remove(options) {
+        return new Promise((resolve, reject)=>{
+            var message = _.merge({
+                request: 'remove'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
+                resolve({
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    leave(options) {
+        return new Promise((resolve, reject)=>{
+            var message = _.merge({
+                request: 'leave'
+            }, options);
+            this.requestMessage(message, {
+                ack: true
+            }).then((res)=>{
+                resolve({
+                    response: res
+                });
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    publishFeed(options) {
+        return new Promise((resolve, reject)=>{
+            assert.property(options, 'room');
+            assert.property(options, 'jsep');
+            this.joinAndConfigure(options).then((res)=>{
+                resolve(res);
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    listenFeed(options) {
+        return this.joinListener(options);
     }
 
     createPublisher(room) {

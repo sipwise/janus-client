@@ -87,7 +87,9 @@ describe('PluginHandle', function(){
         });
 
         it('should destroy a room', function(done) {
-            handle.destroy(123).then(()=>{
+            handle.destroy({
+                room: 123
+            }).then(()=>{
                 done();
             }).catch((err)=>{
                 done(err);
@@ -95,7 +97,9 @@ describe('PluginHandle', function(){
         });
 
         it('should fail while destroying a none existing room', function(done) {
-            handle.destroy(123).then(()=>{
+            handle.destroy({
+                room: 123
+            }).then(()=>{
                 done();
             }).catch((err)=>{
                 done(err);
@@ -103,7 +107,9 @@ describe('PluginHandle', function(){
         });
 
         it('should check whether a room exists', function(done) {
-            handle.exists(123).then(()=>{
+            handle.exists({
+                room: 123
+            }).then(()=>{
                 done();
             }).catch((err)=>{
                 done(err);
@@ -111,8 +117,8 @@ describe('PluginHandle', function(){
         });
 
         it('should list all rooms', function(done) {
-            handle.list().then((list)=>{
-                assert.isArray(list);
+            handle.list().then((res)=>{
+                assert.isArray(res.list);
                 done();
             }).catch((err)=>{
                 done(err);
@@ -120,7 +126,46 @@ describe('PluginHandle', function(){
         });
 
         it('should list all participants', function(done) {
-            done();
+            handle.listParticipants({
+                room: 123
+            }).then((res)=>{
+                assert.isArray(res.participants);
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
+        });
+
+        it('should join a room as publisher', function(done) {
+            handle.join({
+                room: 123,
+                ptype: 'publisher'
+            }).then((res)=>{
+                assert.equal(res.response.getData().videoroom, 'joined');
+                assert.equal(res.response.getData().room, 123);
+                assert.isNumber(res.response.getData().id);
+                assert.isArray(res.response.getData().publishers);
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
+        });
+
+        it('should join a room as listener', function(done) {
+            handle.join({
+                room: 123,
+                ptype: 'listener',
+                feed: 456
+            }).then((res)=>{
+                assert.equal(res.response.getData().videoroom, 'attached');
+                assert.equal(res.response.getData().room, 123);
+                assert.isNumber(res.response.getData().id);
+                assert.deepProperty(res.response.getResponse(), 'jsep.type');
+                assert.deepProperty(res.response.getResponse(), 'jsep.sdp');
+                done();
+            }).catch((err)=>{
+                done(err);
+            });
         });
     });
 });

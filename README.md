@@ -1,18 +1,15 @@
 
-JanusVideoroomClient
-====================
+# Conferencing with Janus WebRTC Gateway
 
 Node.js client that implements a subset of the WebSocket interface of the Janus WebRTC Gateway.
 
 Note: For now it supports the videoroom plugin only.
 
-### Setup
+## Setup
 
 ```javascript
 var JanusVideoroomClient = require('janus-videoroom-client').Janus;
 ```
-
-### Create a new client
 
 #### Without authentication
 
@@ -40,8 +37,7 @@ var client = new JanusVideoroomClient({
 });
 ```
 
-Run tests
----------
+## Run tests
 
     npm test
 

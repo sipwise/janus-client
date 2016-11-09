@@ -32,7 +32,7 @@ class Publisher extends VideoRoomParticipant {
     join(offer) {
         return new Promise((resolve, reject)=>{
             this.setOffer(offer);
-            this.handle.publish({
+            this.handle.publishFeed({
                 room: this.room,
                 jsep: {
                     type: 'offer',
@@ -40,7 +40,7 @@ class Publisher extends VideoRoomParticipant {
                 }
             }).then((result)=>{
                 this.id = result.id;
-                this.answer = result.answer;
+                this.answer = result.jsep.sdp;
                 _.forEach(result.publishers, (publisher)=>{
                     this.handle.createListener(this.room, publisher.id).then((listener)=>{
                         this.addListener(listener);

@@ -20,11 +20,11 @@ class Listener extends VideoRoomParticipant {
 
     createOffer() {
         return new Promise((resolve, reject)=>{
-            this.handle.listen({
+            this.handle.listenFeed({
                 room: this.room,
                 feed: this.feed
             }).then((result)=>{
-                this.offer = result.offer;
+                this.offer = result.jsep.sdp;
                 resolve();
             }).catch((err)=>{
                 reject(err);

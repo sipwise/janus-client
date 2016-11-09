@@ -108,6 +108,13 @@ module.exports = {
                         description: 'This is a simple SIP plugin for Janus, allowing WebRTC peers to register at a SIP server and call SIP user agents through the gateway.',
                         version_string: '0.0.6',
                         version: 6 } } };
+        },
+        ack: function ack(req) {
+            return {
+                janus: 'ack',
+                session_id: req.session_id,
+                transaction: req.transaction
+            }
         }
     },
 
@@ -204,7 +211,7 @@ module.exports = {
             }
         },
         list: function list(req) {
-            return { 
+            return {
                 janus: 'success',
                 session_id: req.session_id,
                 sender: req.handle_id,
@@ -222,6 +229,61 @@ module.exports = {
                             record: 'false',
                             num_participants: 0 }
                     ] } } }
+        },
+        listParticipants: function(req) {
+            return { janus: 'success',
+                session_id: req.session_id,
+                sender: req.handle_id,
+                transaction: req.transaction,
+                plugindata:
+                { plugin: 'janus.plugin.videoroom',
+                    data:
+                    { videoroom: 'participants',
+                        room: req.body.room,
+                        participants: [
+                            { id: 1625997477, publisher: 'true' }
+                        ] } } };
+        },
+        join: function join(req) {
+
+            switch(req.body.ptype) {
+                case 'publisher':
+                    return {
+                        janus: 'event',
+                        session_id: req.session_id,
+                        sender: req.handle_id,
+                        transaction: req.transaction,
+                        plugindata: {
+                            plugin: 'janus.plugin.videoroom',
+                            data: {
+                                videoroom: 'joined',
+                                room: req.body.room,
+                                description: 'Room ' + req.body.room,
+                                id: 1269651309,
+                                publishers: []
+                            }
+                        }
+                    };
+                case 'listener':
+                    return {
+                        janus: 'event',
+                        session_id: req.session_id,
+                        sender: req.handle_id,
+                        transaction: req.transaction,
+                        plugindata: {
+                            plugin: 'janus.plugin.videoroom',
+                            data: {
+                                videoroom: 'attached',
+                                room: req.body.room,
+                                id: 982595215
+                            }
+                        },
+                        jsep: {
+                            type: 'offer',
+                            sdp: 'v=0\r\no=- 1478603918984998 1478603918984997 IN IP4 192.168.0.166\r\ns=Room 1373398250\r\nt=0 0\r\na=ice-lite\r\na=group:BUNDLE audio video\r\na=msid-semantic: WMS janus\r\nm=audio 1 RTP/SAVPF 111\r\nc=IN IP4 192.168.0.166\r\na=mid:audio\r\na=sendonly\r\na=rtcp-mux\r\na=ice-ufrag:qPYE\r\na=ice-pwd:QNSr/4swPap0JAW/3thoim\r\na=ice-options:trickle\r\na=fingerprint:sha-256 D2:B9:31:8F:DF:24:D8:0E:ED:D2:EF:25:9E:AF:6F:B8:34:AE:53:9C:E6:F3:8F:F2:64:15:FA:E8:7F:53:2D:38\r\na=setup:actpass\r\na=connection:new\r\na=rtpmap:111 opus/48000/2\r\na=ssrc:552031021 cname:janusaudio\r\na=ssrc:552031021 msid:janus janusa0\r\na=ssrc:552031021 mslabel:janus\r\na=ssrc:552031021 label:janusa0\r\na=candidate:1 1 udp 2013266431 192.168.0.166 34190 typ host\r\na=candidate:2 1 tcp 1019216383 192.168.0.166 0 typ host tcptype active\r\na=candidate:3 1 tcp 1015022079 192.168.0.166 28666 typ host tcptype passive\r\na=candidate:1 2 udp 2013266430 192.168.0.166 26395 typ host\r\na=candidate:2 2 tcp 1019216382 192.168.0.166 0 typ host tcptype active\r\na=candidate:3 2 tcp 1015022078 192.168.0.166 28551 typ host tcptype passive\r\nm=video 1 RTP/SAVPF 100\r\nc=IN IP4 192.168.0.166\r\na=mid:video\r\na=sendonly\r\na=rtcp-mux\r\na=ice-ufrag:EAp8\r\na=ice-pwd:isef237222KQY+VguYZ5nH\r\na=ice-options:trickle\r\na=fingerprint:sha-256 D2:B9:31:8F:DF:24:D8:0E:ED:D2:EF:25:9E:AF:6F:B8:34:AE:53:9C:E6:F3:8F:F2:64:15:FA:E8:7F:53:2D:38\r\na=setup:actpass\r\na=connection:new\r\na=rtpmap:100 VP8/90000\r\na=rtcp-fb:100 ccm fir\r\na=rtcp-fb:100 nack\r\na=rtcp-fb:100 nack pli\r\na=rtcp-fb:100 goog-remb\r\na=ssrc:154813501 cname:janusvideo\r\na=ssrc:154813501 msid:janus janusv0\r\na=ssrc:154813501 mslabel:janus\r\na=ssrc:154813501 label:janusv0\r\na=candidate:4 1 udp 2013266431 192.168.0.166 30530 typ host\r\na=candidate:5 1 tcp 1019216383 192.168.0.166 0 typ host tcptype active\r\na=candidate:6 1 tcp 1015022079 192.168.0.166 33791 typ host tcptype passive\r\na=candidate:4 2 udp 2013266430 192.168.0.166 20569 typ host\r\na=candidate:5 2 tcp 1019216382 192.168.0.166 0 typ host tcptype active\r\na=candidate:6 2 tcp 1015022078 192.168.0.166 31429 typ host tcptype passive\r\n'
+                        }
+                    }
+            }
         }
     }
 };

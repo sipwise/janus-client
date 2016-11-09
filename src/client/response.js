@@ -27,6 +27,10 @@ class ClientResponse {
         return _.get(this.response, 'janus', null);
     }
 
+    getJsep() {
+        return _.get(this.response, 'jsep', null);
+    }
+
     isError() {
         return this.getType() === 'error';
     }

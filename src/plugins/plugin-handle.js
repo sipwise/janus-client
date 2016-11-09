@@ -98,13 +98,14 @@ class PluginHandle {
     requestMessage(body, options) {
         return new Promise((resolve, reject)=>{
             options = options || {};
+            var jsep = _.get(body, 'jsep', null);
             var req = {
                 janus: 'message',
                 body: body
             };
-            if(_.isObject(options.jsep)) {
-                req.jsep = options.jsep;
-                delete options.jsep;
+            if(jsep !== null) {
+                req.jsep = body.jsep;
+                delete body.jsep;
             }
             this.request(req, options).then((res)=>{
                 var pluginResponse = new PluginResponse(res.getRequest(), res.getResponse());
