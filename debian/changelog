@@ -1,3 +1,25 @@
+janus-client (5.0.0.0+0~mr5.1.0.0) unstable; urgency=medium
+
+  [ Hans-Peter Herzog ]
+  * [914559f] TT#2723 Removed class janus and moved methods to client. Added janus mock server to improve tests.
+  * [8faba16] TT#2723 Added property for token based auth. Increased connection timeout.
+  * [cd515e1] TT#2723 Added videoroom tests.
+  * [15e591b] TT#2723 Added PluginResponse and PluginError
+  * [d1c2441] TT#2723 BugFix: Missing dependency Listener
+  * [69418c8] TT#2723 Created npm shrinkwrap
+  * [d76e5a8] TT#2723 Refactored transaction
+  * [a5311ed] TT#2723 Fixed dependency
+  * [9817a39] TT#2723 Serveral changes related to the publication on npm
+  * [ccc512e] TT#2723 New release
+  * [cbf2d77] TT#2723 Added missing methods of videoroom plugin.
+  * [1aa0d10] TT#2723 npm shrinkwrap
+  * [e2e9cdd] TT#2723 Added usage docs
+  * [33efb94] TT#2723 npm shrinkwrap
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Thu, 17 Nov 2016 23:12:37 +0100
+
 janus-client (5.0.0.0+0~mr5.0.0.0) unstable; urgency=medium
 
   * Initial revision
