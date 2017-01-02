@@ -19,6 +19,11 @@ RUN apt-get install --assume-yes \
 
 RUN echo "cd /code && ./t/testrunner" >/root/.bash_history
 
+# Create files with mode 666 and folders with mode 777 which
+# allows to delete the temporary files (aka results) for
+# non-root users (like 'jenkins' or 'developer's laptop local user')
+RUN echo 'umask 0' >>/root/.bashrc
+
 WORKDIR /code
 
 ################################################################################
