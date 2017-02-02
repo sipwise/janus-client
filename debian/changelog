@@ -1,3 +1,12 @@
+janus-client (5.0.0.0+0~mr5.2.0.0) unstable; urgency=medium
+
+  [ Hans-Peter Herzog ]
+  * [1d917f6] TT#2723 Lock npm deps
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Fri, 03 Feb 2017 00:32:28 +0100
+
 janus-client (5.0.0.0+0~mr5.1.0.0) unstable; urgency=medium
 
   [ Hans-Peter Herzog ]
