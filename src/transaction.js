@@ -30,9 +30,9 @@ class InvalidTransactionState extends Error {
     constructor(transaction) {
         super();
         this.name = this.constructor.name;
-        this.message = 'Invalid transaction state ' + this.transaction.getState();
-        this.transaction = transaction;
+        this.message = 'Invalid transaction state ' + transaction.getState();
         this.state = transaction.getState();
+        this.transaction = transaction;
     }
 }
 

@@ -2,6 +2,7 @@
 
 var Transaction = require('../src/transaction').Transaction;
 var TransactionTimeoutError = require('../src/transaction').TransactionTimeoutError;
+var InvalidTransactionState = require('../src/transaction').InvalidTransactionState;
 var ClientResponse = require('../src/client/response').ClientResponse;
 var assert = require('chai').assert;
 var validator = require('validator');
@@ -140,5 +141,31 @@ describe('Transaction', function(){
             assert.isTrue(ack);
             done();
         }).start();
+    });
+
+    it('should throw an error, due to multiple calls of start', function(done){
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock
+        });
+        transaction.onSent(()=>{
+        }).start();
+        transaction.onError((err)=>{
+            assert.instanceOf(err, InvalidTransactionState);
+            done();
+        }).onSent(()=>{
+        }).start();
+    });
+
+    it('should throw an error, due to invalid call of response', function(done){
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock
+        });
+        transaction.onError((err)=>{
+            assert.instanceOf(err, InvalidTransactionState);
+            done();
+        });
+        transaction.response(new ClientResponse(request, request));
     });
 });
