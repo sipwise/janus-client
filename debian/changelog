@@ -1,3 +1,12 @@
+janus-client (5.0.0.0+0~mr5.2.1.0) unstable; urgency=medium
+
+  [ Hans-Peter Herzog ]
+  * [723f277] TT#12857 Fix bug in error class InvalidTransactionState in janus-client
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Wed, 22 Mar 2017 10:52:00 +0100
+
 janus-client (5.0.0.0+0~mr5.2.0.0) unstable; urgency=medium
 
   [ Hans-Peter Herzog ]
