@@ -4,7 +4,7 @@ var config = require('./config').config;
 var JanusServerMock = require('../src/mock/janus-server').JanusServer;
 var Client = require('../src/client').Client;
 var Session = require('../src/session').Session;
-var VideoRoomHandle = require('../src/plugins').VideoRoom;
+var VideoRoomHandle = require('../src/plugins/videoroom/handle').VideoRoomHandle;
 var assert = require('chai').assert;
 
 var mockServerPort = config.janus.server.port;
@@ -54,7 +54,7 @@ describe('Session', function() {
     });
 
     it('should create video room handle', function(done){
-        session.createVideoRoomHandle().then((handle)=>{
+        session.videoRoom().createVideoRoomHandle().then((handle)=>{
             assert.instanceOf(handle, VideoRoomHandle);
             done();
         }).catch((err)=>{

@@ -33,7 +33,7 @@ describe('PluginHandle', function(){
         });
         client.onConnected(()=>{
             client.createSession().then((session)=>{
-                return session.createVideoRoomHandle();
+                return session.videoRoom().createVideoRoomHandle();
             }).then((videoRoomHandle)=>{
                 handle = videoRoomHandle;
                 done();

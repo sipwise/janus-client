@@ -1,26 +1,17 @@
 'use strict';
 
-var assert = require('chai').assert;
-var _ = require('lodash');
-var Promise = require('bluebird');
-var PluginHandle = require('../plugin-handle').PluginHandle;
-var VideoRoom = require('./room').VideoRoom;
-var PluginError = require('../../errors').PluginError;
-var logger = require('debug-logger')('janus:videoroom:handle');
-var Publisher = require('./publisher').Publisher;
-var Listener = require('./listener').Listener;
-
-var ParticipantType = {
-    publisher: 'publisher',
-    listener: 'listener'
-};
+var Plugin = require('../plugin').Plugin;
+var VideoRoomHandle = require('./handle').VideoRoomHandle;
+var VideoRoomPublisher = require('./publisher').VideoRoomPublisher;
+var VideoRoomListener = require('./listener').VideoRoomListener;
 
 var AudioCodec = {
     opus: 'opus',
     isac32: 'isac32',
     isac16: 'isac16',
     pcmu: 'pcmu',
-    pcma: 'pcma'
+    pcma: 'pcma',
+    g722: 'g722'
 };
 
 var VideoCodec = {
@@ -29,407 +20,124 @@ var VideoCodec = {
     h264: 'h264'
 };
 
-/**
- * @class
- */
-class VideoRoomHandle extends PluginHandle {
-
-    static getName() {
-        return 'janus.plugin.videoroom';
-    }
+class VideoRoomPlugin extends Plugin {
 
     constructor(options) {
-        super(options.id, options.session);
+        super();
+        this.name = 'videoroom';
+        this.fullName = 'janus.plugin.' + this.name;
+        this.session = options.session;
+        this.$defaultHandle = null;
     }
 
-    create(options) {
+    defaultHandle() {
         return new Promise((resolve, reject)=>{
-            options = options || {};
-            var message = _.merge({
-                request: 'create'
-            }, options);
-            this.requestMessage(message).then((res)=>{
-                resolve({
-                    room: res.getData().room,
-                    response: res
+            if(this.$defaultHandle === null) {
+                this.createVideoRoomHandle().then((handle)=>{
+                    this.$defaultHandle = handle;
+                    resolve(this.$defaultHandle);
+                }).catch((err)=>{
+                    reject(err);
                 });
+            } else {
+                resolve(this.$defaultHandle);
+            }
+        });
+    }
+
+    createVideoRoomHandle() {
+        return new Promise((resolve, reject)=>{
+            this.createHandle().then((id)=>{
+                this.addHandle(new VideoRoomHandle({
+                    id: id,
+                    session: this.getSession()
+                }));
+                resolve(this.getHandle(id));
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    destroy(options) {
+    createPublisherHandle(room) {
         return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            var message = _.merge({
-                request: 'destroy'
-            }, options);
-            this.requestMessage(message).then((res)=>{
-                resolve({
-                    response: res
-                });
+            this.createHandle().then((id)=>{
+                this.addHandle(new VideoRoomPublisher({
+                    id: id,
+                    session: this.getSession(),
+                    room: room
+                }));
+                resolve(this.getHandle(id));
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    exists(options) {
+    createListenerHandle(room, feed) {
         return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            var message = _.merge({
-                request: 'exists'
-            }, options);
-            this.requestMessage(message).then((res)=>{
-                resolve({
-                    exists: res.getData().exists,
-                    response: res
-                });
+            this.createHandle().then((id)=>{
+                this.addHandle(new VideoRoomListener({
+                    id: id,
+                    session: this.getSession(),
+                    room: room,
+                    feed: feed
+                }));
+                resolve(this.getHandle(id));
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    list() {
+    publishFeed(room, offer) {
         return new Promise((resolve, reject)=>{
-            this.requestMessage({
-                request: 'list'
-            }).then((res)=>{
-                resolve({
-                    list: res.getData().list || [],
-                    response: res
-                });
+            var handle = null;
+            Promise.resolve().then(()=>{
+                return this.createPublisherHandle(room);
+            }).then((createdHandle)=>{
+                handle = createdHandle;
+                return handle.createAnswer(offer);
+            }).then(()=>{
+                resolve(handle);
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    listParticipants(options) {
+    listenFeed(room, feed) {
         return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            var message = _.merge({
-                request: 'listparticipants'
-            }, options);
-            this.requestMessage(message).then((res)=>{
-                resolve({
-                    participants: res.getData().participants || [],
-                    response: res
-                });
+            var handle = null;
+            Promise.resolve().then(()=>{
+                return this.createListenerHandle(room);
+            }).then((createdHandle)=>{
+                handle = createdHandle;
+                return handle.createOffer();
+            }).then(()=>{
+                resolve(handle);
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
 
-    join(options) {
+    getFeeds(room) {
         return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            assert.property(options, 'ptype');
-            var message = _.merge({
-                request: 'join'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    id: res.getData().id,
-                    jsep: res.getJsep(),
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    joinPublisher(options) {
-        return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            var joinOptions = _.merge({
-                ptype: ParticipantType.publisher
-            }, options);
-            this.join(joinOptions, {
-                ack: true
-            }).then((res)=>{
-                resolve(res);
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    joinListener(options) {
-        return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            assert.property(options, 'feed');
-            var joinOptions = _.merge({
-                ptype: ParticipantType.listener
-            }, options);
-            this.join(joinOptions, {
-                ack: true
-            }).then((res)=>{
-                resolve(res);
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    configure(options) {
-        return new Promise((resolve, reject)=>{
-            options.audio = _.get(options, 'audio', true);
-            options.video = _.get(options, 'video', true);
-            var message = _.merge({
-                request: 'configure'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    joinAndConfigure(options) {
-        return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            assert.property(options, 'jsep');
-            options.audio = _.get(options, 'audio', true);
-            options.video = _.get(options, 'video', true);
-            var message = _.merge({
-                request: 'joinandconfigure',
-                ptype: 'publisher'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    id: res.getData().id,
-                    jsep: res.getJsep(),
-                    publishers: res.getData().publishers,
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    publish(options) {
-        return new Promise((resolve, reject)=>{
-            assert.property(options, 'jsep');
-            var message = _.merge({
-                request: 'publish'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    unpublish(options) {
-        return new Promise((resolve, reject)=>{
-            var message = _.merge({
-                request: 'unpublish'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    start(options) {
-        return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            assert.property(options, 'jsep');
-            var message = _.merge({
-                request: 'start'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    /**
-     * Note: Documented at https://janus.conf.meetecho.com/docs/janus__videoroom_8c.html,
-     * but get error "423 Unknown request".
-     * @deprecated
-     */
-    pause(options) {
-        return new Promise((resolve, reject)=>{
-            var message = _.merge({
-                request: 'pause'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    switch(options) {
-        return new Promise((resolve, reject)=>{
-            var message = _.merge({
-                request: 'switch'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    /**
-     * Note: Documented at https://janus.conf.meetecho.com/docs/janus__videoroom_8c.html,
-     * but get error "423 Unknown request".
-     * @deprecated
-     */
-    stop(options) {
-        return new Promise((resolve, reject)=>{
-            var message = _.merge({
-                request: 'stop'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    add(options) {
-        return new Promise((resolve, reject)=>{
-            var message = _.merge({
-                request: 'add'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    remove(options) {
-        return new Promise((resolve, reject)=>{
-            var message = _.merge({
-                request: 'remove'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    leave(options) {
-        return new Promise((resolve, reject)=>{
-            var message = _.merge({
-                request: 'leave'
-            }, options);
-            this.requestMessage(message, {
-                ack: true
-            }).then((res)=>{
-                resolve({
-                    response: res
-                });
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    publishFeed(options) {
-        return new Promise((resolve, reject)=>{
-            assert.property(options, 'room');
-            assert.property(options, 'jsep');
-            this.joinAndConfigure(options).then((res)=>{
-                resolve(res);
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    listenFeed(options) {
-        return this.joinListener(options);
-    }
-
-    createPublisher(room) {
-        return new Promise((resolve, reject)=>{
-            assert.isNotNaN(parseInt(room));
-            var publisher = new Publisher({
-                session: this.session,
-                room: parseInt(room)
-            });
-            publisher.init().then(()=>{
-                resolve(publisher);
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
-    }
-
-    createListener(room, feed) {
-        return new Promise((resolve, reject)=>{
-            assert.isNotNaN(parseInt(room));
-            assert.isNotNaN(parseInt(feed));
-            var listener = new Listener({
-                session: this.session,
-                room: parseInt(room),
-                feed: parseInt(feed)
-            });
-            listener.init().then(()=>{
-                resolve(listener);
+            var feeds = [];
+            Promise.resolve().then(()=>{
+                return this.defaultHandle();
+            }).then((handle)=>{
+                return handle.listParticipants({ room: room });
+            }).then((result)=>{
+                if(result.participants.length > 0) {
+                    for(let participant of result.participants) {
+                        if(validator.toBoolean(participant.publisher)) {
+                            feeds.push(participant.id);
+                        }
+                    }
+                }
+                resolve(feeds);
             }).catch((err)=>{
                 reject(err);
             });
@@ -437,4 +145,6 @@ class VideoRoomHandle extends PluginHandle {
     }
 }
 
-module.exports.VideoRoomHandle = VideoRoomHandle;
+module.exports.VideoRoomPlugin = VideoRoomPlugin;
+module.exports.AudioCodec = AudioCodec;
+module.exports.VideoCodec = VideoCodec;
