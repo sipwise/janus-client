@@ -5,16 +5,20 @@ Node.js client that implements a subset of the WebSocket interface of the Janus 
 
 Note: For now it supports the videoroom plugin only.
 
-## Initial setup
+## Setup janus client
 
 ```javascript
-var JanusVideoroomClient = require('janus-videoroom-client').Janus;
+var JanusClient = require('janus-videoroom-client').Janus;
 ```
+
+## Establish connection to the Janus WebSocket API
+
+### 1. Create client
 
 Without authentication
 
 ```javascript
-var client = new JanusVideoroomClient({
+var client = new JanusClient({
     url: 'ws://localhost:8188'
 });
 ```
@@ -22,7 +26,7 @@ var client = new JanusVideoroomClient({
 Token based authentication
 
 ```javascript
-var client = new JanusVideoroomClient({
+var client = new JanusClient({
     url: 'ws://localhost:8188',
     token: 'yourToken'
 });
@@ -31,33 +35,131 @@ var client = new JanusVideoroomClient({
 Static secret authentication
 
 ```javascript
-var client = new JanusVideoroomClient({
+var client = new JanusClient({
     url: 'ws://localhost:8188',
     apiSecret: 'yourStaticSecret'
 });
 ```
 
-## Usage
+### 2. Register events connected, disconnected, error
 
-Create a new janus session
+```javascript
+client.onConnected(()=>{
+    client.createSession().then((session)=>{
+        ...
+    }).catch((err)=>{
+        ...
+    })
+});
+```
+
+```javascript
+client.onDisconnected(()=>{
+    
+});
+```
+
+```javascript
+client.onError((err)=>{
+    
+});
+```
+
+### 3. Call connect method
+
+```javascript
+client.connect();
+```
+
+## Create a new janus session
 
 ```javascript
 client.createSession().then((session)=>{
-    ...
-}).catch((err)=>{
     ...
 });
 ```
 
-Create a new videoroom handle
+## Create a new videoroom handle
 
 ```javascript
 client.createSession().then((session)=>{
-    return session.createVideoRoomHandle();
-}).then((handle)=>{
+    return session.videoRoom().createVideoRoomHandle();
+}).then((videoRoomHandle)=>{
     ...
-}).catch((err)=>{
+});
+```
+
+## Get default videoroom handle
+
+```javascript
+client.createSession().then((session)=>{
+    return session.videoRoom().defaultHandle();
+}).then((videoRoomHandle)=>{
     ...
+});
+```
+
+## Create a new videoroom
+
+```javascript
+videoRoomHandle.create({
+   publishers: 3,
+   is_private: 'no',
+   secret: '****',
+   pin: '****',
+   audiocodec: 'opus',
+   videocodec: 'vp8',
+   record: false
+}).then((result)=>{
+    var roomId = result.room;
+    ...
+});
+```
+
+## Publish media stream
+
+```javascript
+session.videoRoom().publishFeed(room, offerSdp).then((publisherHandle)=>{
+    var answerSdp = publisherHandle.getAnswer();
+    ...
+});
+```
+
+```javascript
+publisherHandle.trickle(candidate).then(()=>{
+    ...
+});
+```
+
+## Subscribe to a media stream
+
+```javascript
+session.videoRoom().listenFeed(room, feed).then((listenerHandle)=>{
+    var offerSdp = listenerHandle.getOffer();
+    ...
+});
+```
+
+```javascript
+listenerHandle.trickle(candidate).then(()=>{
+    ...
+});
+```
+
+```javascript
+listenerHandle.setRemoteAnswer(answerSdp).then(()=>{
+    ...
+});
+```
+
+
+## Get current published media streams
+
+```javascript
+session.videoRoom().getFeeds(room).then((feeds)=>{
+    for(let feed of feeds) {
+        ...
+    }
 });
 ```
 

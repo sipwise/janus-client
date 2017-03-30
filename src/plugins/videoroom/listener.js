@@ -2,27 +2,37 @@
 
 var Promise = require('bluebird');
 var logger = require('debug-logger')('janus:videoroom:listener');
-var VideoRoomParticipant = require('./participant').VideoRoomParticipant;
+var VideoRoomHandle = require('./handle').VideoRoomHandle;
 
 /**
  * @class
  */
-class Listener extends VideoRoomParticipant {
+class VideoRoomListener extends VideoRoomHandle {
 
     constructor(options) {
         super(options);
+        this.room = options.room;
         this.feed = options.feed;
+        this.offer = null;
+    }
+
+    getRoom() {
+        return this.room;
     }
 
     getFeed() {
         return this.feed;
     }
 
+    getOffer() {
+        return this.offer;
+    }
+
     createOffer() {
         return new Promise((resolve, reject)=>{
-            this.handle.listenFeed({
-                room: this.room,
-                feed: this.feed
+            this.listenFeed({
+                room: this.getRoom(),
+                feed: this.getFeed()
             }).then((result)=>{
                 this.offer = result.jsep.sdp;
                 resolve();
@@ -32,19 +42,15 @@ class Listener extends VideoRoomParticipant {
         });
     }
 
-    setAnswer(sdp) {
-        this.answer = sdp.replace(/a=(sendrecv|sendonly)/, 'a=recvonly');
-    }
-
     setRemoteAnswer(answer) {
         return new Promise((resolve, reject)=>{
-            this.setAnswer(answer);
-            this.handle.start({
-                room: this.room,
-                feed: this.feed,
+            answer = answer.replace(/a=(sendrecv|sendonly)/, 'a=recvonly');
+            this.start({
+                room: this.getRoom(),
+                feed: this.getFeed(),
                 jsep: {
                     type: 'answer',
-                    sdp: this.getAnswer()
+                    sdp: answer
                 }
             }).then(()=>{
                 resolve();
@@ -55,4 +61,4 @@ class Listener extends VideoRoomParticipant {
     }
 }
 
-module.exports.Listener = Listener;
+module.exports.VideoRoomListener = VideoRoomListener;

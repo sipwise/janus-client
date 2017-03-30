@@ -2,69 +2,50 @@
 
 var _ = require('lodash');
 var Promise = require('bluebird');
-var EventEmitter = require('events').EventEmitter;
 var logger = require('debug-logger')('janus:videoroom:publisher');
-var VideoRoomParticipant = require('./participant').VideoRoomParticipant;
+var VideoRoomHandle = require('./handle').VideoRoomHandle;
 
 /**
  * @class
  */
-class Publisher extends VideoRoomParticipant {
+class VideoRoomPublisher extends VideoRoomHandle {
 
     constructor(options) {
         super(options);
-        this.id = null;
-        this.listeners = {};
+        this.publisherId = null;
+        this.room = options.room;
+        this.answer = null;
     }
 
-    getId() {
-        return this.id;
+    getPublisherId() {
+        return this.publisherId;
     }
 
-    addListener(listener) {
-        this.listeners[listener.getFeed()] = listener;
+    getRoom() {
+        return this.room;
     }
 
-    removeListener(id) {
-        delete this.listeners[id];
+    getAnswer() {
+        return this.answer;
     }
 
-    join(offer) {
+    createAnswer(offer) {
         return new Promise((resolve, reject)=>{
-            this.setOffer(offer);
-            this.handle.publishFeed({
-                room: this.room,
+            this.publishFeed({
+                room: this.getRoom(),
                 jsep: {
                     type: 'offer',
-                    sdp: this.getOffer()
+                    sdp: offer
                 }
             }).then((result)=>{
-                this.id = result.id;
+                this.publisherId = result.id;
                 this.answer = result.jsep.sdp;
-                _.forEach(result.publishers, (publisher)=>{
-                    this.handle.createListener(this.room, publisher.id).then((listener)=>{
-                        this.addListener(listener);
-                        return listener.createOffer();
-                    }).then(()=>{
-                        this.emitter.emit('joined', this.listeners[publisher.id]);
-                    }).catch((err)=>{
-                        logger.error(err);
-                    });
-                });
                 resolve();
             }).catch((err)=>{
                 reject(err);
             });
         });
     }
-
-    onJoined(listener) {
-        this.emitter.on('joined', listener);
-    }
-
-    onLeft(listener) {
-        this.emitter.on('left', listener);
-    }
 }
 
-module.exports.Publisher = Publisher;
+module.exports.VideoRoomPublisher = VideoRoomPublisher;
