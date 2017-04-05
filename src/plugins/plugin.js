@@ -1,5 +1,7 @@
 'use strict';
 
+var Promise = require('bluebird');
+
 class Plugin {
 
     constructor(options) {
@@ -49,6 +51,28 @@ class Plugin {
             }).catch((err)=>{
                 reject(err);
             });
+        });
+    }
+
+    destroyHandle(handle) {
+        return this.destroyHandleById(handle.getId());
+    }
+
+    destroyHandleById(id) {
+        return new Promise((resolve, reject)=>{
+            if(this.hasHandle(id)) {
+                let handle = this.getHandle(id);
+                handle.detach().then(()=>{
+                    this.removeHandle(id);
+                    resolve();
+                }).catch((err)=>{
+                    this.removeHandle(id);
+                    reject(err);
+                });
+            } else {
+                this.removeHandle(id);
+                resolve();
+            }
         });
     }
 }
