@@ -50,7 +50,7 @@ class VideoRoomPlugin extends Plugin {
             this.createHandle().then((id)=>{
                 this.addHandle(new VideoRoomHandle({
                     id: id,
-                    session: this.getSession()
+                    plugin: this
                 }));
                 resolve(this.getHandle(id));
             }).catch((err)=>{
@@ -64,7 +64,7 @@ class VideoRoomPlugin extends Plugin {
             this.createHandle().then((id)=>{
                 this.addHandle(new VideoRoomPublisher({
                     id: id,
-                    session: this.getSession(),
+                    plugin: this,
                     room: room
                 }));
                 resolve(this.getHandle(id));
@@ -79,7 +79,7 @@ class VideoRoomPlugin extends Plugin {
             this.createHandle().then((id)=>{
                 this.addHandle(new VideoRoomListener({
                     id: id,
-                    session: this.getSession(),
+                    plugin: this,
                     room: room,
                     feed: feed
                 }));

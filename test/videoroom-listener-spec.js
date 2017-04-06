@@ -8,7 +8,9 @@ describe('VideoRoomListener', function(){
         var publisher = new VideoRoomListener({
             room: 123,
             feed: 456,
-            session: {}
+            plugin: {
+                getSession() {}
+            }
         });
     });
 });

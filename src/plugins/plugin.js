@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var Promise = require('bluebird');
 
 class Plugin {
@@ -46,7 +47,7 @@ class Plugin {
 
     createHandle() {
         return new Promise((resolve, reject)=>{
-            this.session.createPluginHandle(this.getFullName()).then((handleId)=>{
+            this.getSession().createPluginHandle(this.getFullName()).then((handleId)=>{
                 resolve(handleId);
             }).catch((err)=>{
                 reject(err);
@@ -71,7 +72,7 @@ class Plugin {
                 });
             } else {
                 this.removeHandle(id);
-                resolve();
+                reject(new Error('Invalid handle id ' + id));
             }
         });
     }

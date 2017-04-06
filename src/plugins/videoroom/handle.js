@@ -18,7 +18,7 @@ var ParticipantType = {
 class VideoRoomHandle extends PluginHandle {
 
     constructor(options) {
-        super(options.id, options.session);
+        super(options);
     }
 
     create(options) {

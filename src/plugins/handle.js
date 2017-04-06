@@ -1,21 +1,29 @@
 'use strict';
 
 var _ = require('lodash');
+var Promise = require('bluebird');
 var EventEmitter = require('events').EventEmitter;
 var JanusEvents = require('../constants').JanusEvents;
+var logger = require('debug-logger')('janus:handle');
 var PluginError = require('../errors').PluginError;
 var PluginResponse = require('../client/response').PluginResponse;
-var logger = require('debug-logger')('janus:handle');
+
+const ConnectionState = {
+    connected: 'connected',
+    disconnected: 'disconnected'
+};
 
 /**
  * @class
  */
 class PluginHandle {
 
-    constructor(id, session) {
-        this.id = id;
-        this.session = session;
+    constructor(options) {
+        this.id = options.id;
+        this.plugin = options.plugin;
         this.emitter = new EventEmitter();
+        this.connectionState = ConnectionState.disconnected;
+        this.disposed = false;
     }
 
     getId() {
@@ -23,7 +31,19 @@ class PluginHandle {
     }
 
     getSession() {
-        return this.session;
+        return this.getPlugin().getSession();
+    }
+
+    getPlugin() {
+        return this.plugin;
+    }
+
+    isConnected() {
+        return this.connectionState;
+    }
+
+    isDisposed() {
+        return this.disposed;
     }
 
     detach() {
@@ -33,8 +53,18 @@ class PluginHandle {
     }
 
     hangup() {
-        return this.request({
-            janus: 'hangup'
+        return new Promise((resolve, reject)=>{
+           if(this.isConnected()) {
+               this.request({
+                   janus: 'hangup'
+               }).then((result)=>{
+                   resolve(result);
+               }).catch((err)=>{
+                   reject(err);
+               });
+           } else {
+               reject(new Error('Handle not connected'));
+           }
         });
     }
 
@@ -57,13 +87,18 @@ class PluginHandle {
     event(event) {
         switch(event.janus) {
             case JanusEvents.webrtcup:
+                this.connectionState = ConnectionState.connected;
                 this.emitter.emit(JanusEvents.webrtcup, event);
                 break;
             case JanusEvents.media:
                 this.emitter.emit(JanusEvents.media, event);
                 break;
             case JanusEvents.hangup:
+                this.connectionState = ConnectionState.disconnected;
                 this.emitter.emit(JanusEvents.hangup, event);
+                break;
+            case JanusEvents.slowlink:
+                this.emitter.emit(JanusEvents.slowlink, event);
                 break;
             case JanusEvents.event:
                 this.emitter.emit(JanusEvents.event, event);
@@ -86,13 +121,17 @@ class PluginHandle {
         this.emitter.addListener(JanusEvents.hangup, listener);
     }
 
+    onSlowlink(listener) {
+        this.emitter.addListener(JanusEvents.slowlink, listener);
+    }
+
     onEvent(listener) {
         this.emitter.addListener(JanusEvents.event, listener);
     }
 
     request(obj, options) {
         obj.handle_id = this.getId();
-        return this.session.request(obj, options);
+        return this.getPlugin().getSession().request(obj, options);
     }
 
     requestMessage(body, options) {
@@ -117,6 +156,21 @@ class PluginHandle {
             }).catch((err)=>{
                 reject(err);
             });
+        });
+    }
+
+    dispose() {
+        return new Promise((resolve, reject)=>{
+            if(!this.isDisposed()) {
+                this.disposed = true;
+                this.getPlugin().destroyHandle(this).then(()=>{
+                    resolve();
+                }).catch((err)=>{
+                    reject(err);
+                });
+            } else {
+                reject(new Error('Already disposed'));
+            }
         });
     }
 }
