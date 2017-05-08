@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a166590_2ee2a6d5",
+        "filename": "t/Dockerfile",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2017-05-08T13:08:05Z",
+      "side": 0,
+      "message": "Are they necessary for previous branches like mr5.0*/mr5.1*/mr5.2* ?\n\nUnfortunately docker images are NOT separated for branches.\nThe same image is being used for all branches. I believe it can be an issue here as we use \"npm install\" inside Dockerfile now.\n\nWe need to force Victor to finish this task when he returns from Vacation. :-(\n\nSo, if nodejs-legacy is necessary for test in previous branches - it should stay here.",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 11
+      },
+      "revId": "2e89380fe95e564d95e0ccb40246e70e9169c3b7",
+      "serverId": "85315e57-5f03-49c3-83f8-201ae2313a75",
+      "unresolved": false
+    }
+  ]
+}
