@@ -22,6 +22,30 @@
       "revId": "2e89380fe95e564d95e0ccb40246e70e9169c3b7",
       "serverId": "85315e57-5f03-49c3-83f8-201ae2313a75",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a166590_0edb6a1c",
+        "filename": "t/Dockerfile",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2017-05-08T13:13:07Z",
+      "side": 0,
+      "message": "ignore, as I can see it was never created:\n15:12:04 ✔ taurus:(master)~/sipwise/git/janus-client$ docker pull docker.mgm.sipwise.com/janus-client-jessie\nUsing default tag: latest\nPulling repository docker.mgm.sipwise.com/janus-client-jessie\nError: image janus-client-jessie:latest not found\n15:12:05 ✘ taurus:(master)~/sipwise/git/janus-client$",
+      "parentUuid": "5a166590_2ee2a6d5",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 11
+      },
+      "revId": "2e89380fe95e564d95e0ccb40246e70e9169c3b7",
+      "serverId": "85315e57-5f03-49c3-83f8-201ae2313a75",
+      "unresolved": false
     }
   ]
 }
