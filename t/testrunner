@@ -8,33 +8,15 @@ fi
 set -e
 set -u
 
-echo "JFYI, usage: $0 [<output_directory>] [junit]"
+echo "### Copying and moving files"
+cp -Rf . /tmp/code
+ln -s /tmp/node_modules /tmp/code/node_modules
+cd /tmp/code/
 
-OUTPUT_DIRECTORY="${1:-/results/}"
-mkdir -p "${OUTPUT_DIRECTORY}"
-results="${OUTPUT_DIRECTORY}/test_results.tap"
-echo "1..1" > "${results}"
-echo "ok 1 - All OK" >> "${results}"
+echo "################################################################################"
+echo "Finished main setup, now running tests ..."
 
-code_ro="/code"
-code_rw="/code_rw"
+npm test
 
-# We need to make a copy here becuase in nature of npm is
-# to use current folder for dependencies installation.
-# It is dangerous as sources should not be chnaged during the test.
-mkdir -p "${code_rw}"
-cp -a "${code_ro}"/* "${code_rw}"
-cd "${code_rw}"
-
-if ! npm install ; then
-  echo "1..1" > "${results}"
-  echo "not ok 1 - 'nmp install' failed" >> "${results}"
-  exit 1
-fi
-
-if ! npm test ; then
-  echo "1..1" > "${results}"
-  echo "not ok 1 - 'nmp test' failed" >> "${results}"
-  exit 1
-fi
-
+echo "Finished test execution, test execution returned with exit code."
+echo "################################################################################"
