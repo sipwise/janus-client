@@ -1,3 +1,20 @@
+janus-client (5.0.0.0+0~mr5.3.1.0) unstable; urgency=medium
+
+  [ Hans-Peter Herzog ]
+  * [abb1a0f] TT#13969 Adjust janus-videoroom-client according to the new requirements
+  * [f8c8c6f] TT#14098 Destroy and cleanup handle by a given id
+  * [2e89380] TT#14250 Handle can destroy itself by calling dispose
+
+  [ Victor Seva ]
+  * [218ada3] TT#13403 override lintian error
+
+  [ Markus Danek ]
+  * [0945297] TT#15803 Remove unused debian packages and run 'npm install' in Dockerfile
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Tue, 16 May 2017 21:34:41 +0200
+
 janus-client (5.0.0.0+0~mr5.3.0.0) unstable; urgency=medium
 
   [ Hans-Peter Herzog ]
