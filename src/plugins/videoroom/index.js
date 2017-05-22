@@ -1,5 +1,8 @@
 'use strict';
 
+var _ = require('lodash');
+var assert = require('chai').assert;
+var validator = require('validator');
 var Plugin = require('../plugin').Plugin;
 var VideoRoomHandle = require('./handle').VideoRoomHandle;
 var VideoRoomPublisher = require('./publisher').VideoRoomPublisher;
@@ -122,8 +125,14 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
+    /**
+     * Returns an array of publisher ids of a given room.
+     * @param room Room number
+     * @returns {Promise}
+     */
     getFeeds(room) {
         return new Promise((resolve, reject)=>{
+            assert.isNumber(room, 'Missing room id');
             var feeds = [];
             Promise.resolve().then(()=>{
                 return this.defaultHandle();
@@ -133,11 +142,35 @@ class VideoRoomPlugin extends Plugin {
                 if(result.participants.length > 0) {
                     for(let participant of result.participants) {
                         if(validator.toBoolean(participant.publisher)) {
+                            let feedId;
+                            if(_.isNumber(participant.id)) {
+                                feedId = parseInt()
+                            }
                             feeds.push(participant.id);
                         }
                     }
                 }
                 resolve(feeds);
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    /**
+     * Returns a list of publisher ids excluding the given feed.
+     * @param room
+     * @param feed
+     * @returns {Promise}
+     */
+    getFeedsExclude(room, feed) {
+        assert.isNumber(room, 'Missing room id');
+        assert.isNumber(feed, 'Missing feed to exclude');
+        return new Promise((resolve, reject)=>{
+            this.getFeeds(room).then((feeds)=>{
+                resolve(_.remove(feeds, ($feed)=>{
+                    return $feed !== feed;
+                }));
             }).catch((err)=>{
                 reject(err);
             });

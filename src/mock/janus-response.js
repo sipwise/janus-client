@@ -241,7 +241,14 @@ module.exports = {
                     { videoroom: 'participants',
                         room: req.body.room,
                         participants: [
-                            { id: 1625997477, publisher: 'true' }
+                            {
+                                id: 1,
+                                publisher: 'true'
+                            },
+                            {
+                                id: 2,
+                                publisher: 'true'
+                            }
                         ] } } };
         },
         join: function join(req) {

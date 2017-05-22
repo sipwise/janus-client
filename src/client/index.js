@@ -59,6 +59,7 @@ class Client {
         this.requestTimeout = options.requestTimeout || 6000;
         this.protocol = 'janus-protocol';
         this.webSocket = null;
+        this.WebSocket = _.get(options, 'WebSocket', WebSocket);
         this.emitter = new EventEmitter();
         this.transactions = {};
         this.connectionTimeoutTimer = null;
@@ -82,7 +83,7 @@ class Client {
 
     connect() {
         if(this.webSocket === null) {
-            this.webSocket = new WebSocket(this.url, this.protocol);
+            this.webSocket = new this.WebSocket(this.url, this.protocol);
             this.webSocket.on(WebSocketEvent.open, ()=>{ this.open(); });
             this.webSocket.on(WebSocketEvent.close, ()=>{ this.close(); });
             this.webSocket.on(WebSocketEvent.message, (message)=>{ this.message(message); });
@@ -139,11 +140,13 @@ class Client {
 
     message(message) {
         this.startConnectionTimeout();
-        var obj;
+        var parsedMessage = message;
         try {
-            obj = JSON.parse(message);
-            this.logger.debug('Received message', obj);
-            this.dispatchObject(obj);
+            if(_.isString(message)) {
+                parsedMessage = JSON.parse(message);
+            }
+            this.logger.debug('Received message', parsedMessage);
+            this.dispatchObject(parsedMessage);
         } catch(err) {
             this.emitter.emit(ClientEvent.error, err);
         }
