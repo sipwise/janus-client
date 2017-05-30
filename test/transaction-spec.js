@@ -1,6 +1,7 @@
 'use strict';
 
 var Transaction = require('../src/transaction').Transaction;
+var TransactionState = require('../src/transaction').TransactionState;
 var TransactionTimeoutError = require('../src/transaction').TransactionTimeoutError;
 var InvalidTransactionState = require('../src/transaction').InvalidTransactionState;
 var ClientResponse = require('../src/client/response').ClientResponse;
@@ -67,10 +68,12 @@ describe('Transaction', function(){
             transaction: transaction.getId()
         };
         transaction.onSent(()=>{
+            assert.equal(transaction.getState(), TransactionState.started);
             transaction.response(new ClientResponse(request, response));
         }).onResponse((res)=>{
-            assert.equal(transaction.getState(), 'ended');
+            assert.equal(transaction.getState(), TransactionState.receiving);
             assert.deepEqual(res.getResponse(), response);
+        }).onEnd(()=>{
             done();
         }).start();
     });
@@ -85,15 +88,17 @@ describe('Transaction', function(){
         });
         this.timeout(timeout + 500);
         transaction.onError(function(err){
-            assert.equal(transaction.getState(), 'ended');
+            assert.equal(transaction.getState(), TransactionState.ended);
             assert.instanceOf(err, TransactionTimeoutError);
+        }).onEnd(()=>{
+            assert.equal(transaction.getState(), TransactionState.ended);
             done();
         }).start();
     });
 
     it('should receive ack and response', function(done){
 
-        var ack = true;
+        var hasAck = false;
         var transaction = new Transaction({
             request: request,
             client: clientMock,
@@ -103,14 +108,54 @@ describe('Transaction', function(){
             janus: 'success',
             transaction: transaction.getId()
         };
+        var ack = {
+            janus: 'ack',
+            transaction: transaction.getId()
+        };
         transaction.onSent(()=>{
+            assert.equal(transaction.getState(), TransactionState.started);
+            transaction.response(new ClientResponse(request, ack));
             transaction.response(new ClientResponse(request, response));
         }).onAck(()=>{
-            ack = true;
+            assert.equal(transaction.getState(), TransactionState.receiving);
+            hasAck = true;
         }).onResponse((res)=>{
-            assert.equal(transaction.getState(), 'ended');
+            assert.equal(transaction.getState(), TransactionState.receiving);
             assert.deepEqual(res.getResponse(), response);
-            assert.isTrue(ack);
+            assert.isTrue(hasAck);
+        }).onEnd(()=>{
+            done();
+        }).start();
+    });
+
+    it('should receive response and late ack  ', function(done){
+
+        var hasResponse = true;
+        var transaction = new Transaction({
+            request: request,
+            client: clientMock,
+            ack: true
+        });
+        var response = {
+            janus: 'success',
+            transaction: transaction.getId()
+        };
+        var ack = {
+            janus: 'ack',
+            transaction: transaction.getId()
+        };
+        transaction.onSent(()=>{
+            assert.equal(transaction.getState(), TransactionState.started);
+            transaction.response(new ClientResponse(request, response));
+            transaction.response(new ClientResponse(request, ack));
+        }).onAck(()=>{
+            assert.equal(transaction.getState(), TransactionState.receiving);
+            assert.isTrue(hasResponse);
+        }).onResponse((res)=>{
+            assert.equal(transaction.getState(), TransactionState.receiving);
+            hasResponse = true;
+            assert.deepEqual(res.getResponse(), response);
+        }).onEnd(()=>{
             done();
         }).start();
     });
@@ -132,11 +177,13 @@ describe('Transaction', function(){
             transaction: transaction.getId()
         };
         transaction.onSent(()=>{
+            assert.equal(transaction.getState(), TransactionState.started);
             transaction.response(new ClientResponse(request, response));
         }).onAck(()=>{
+            assert.equal(transaction.getState(), TransactionState.receiving);
             ack = true;
         }).onError(function(err){
-            assert.equal(transaction.getState(), 'ended');
+            assert.equal(transaction.getState(), TransactionState.ended);
             assert.instanceOf(err, TransactionTimeoutError);
             assert.isTrue(ack);
             done();

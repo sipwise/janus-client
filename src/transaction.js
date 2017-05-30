@@ -12,6 +12,7 @@ var State = {
     new: 'new',
     started: 'started',
     sent: 'sent',
+    receiving: 'receiving',
     ended: 'ended'
 };
 
@@ -68,6 +69,13 @@ class Transaction {
         this.timeout = _.get(options, 'timeout', 12000);
         this.ack = _.get(options, 'ack', false);
         _.set(this.request, 'transaction', this.id);
+        this.ackReceived = false;
+        this.responseReceived = false;
+        this.lateAck = false;
+    }
+
+    isLateAck() {
+        return this.lateAck;
     }
 
     getId() {
@@ -87,7 +95,6 @@ class Transaction {
             this.state = State.started;
             this.startTimeout();
             this.client.sendObject(this.getRequest()).then(()=>{
-                this.state = State.sent;
                 this.emitter.emit('sent', this.getRequest());
             }).catch((err)=>{
                 this.error(err);
@@ -102,15 +109,30 @@ class Transaction {
         assert.instanceOf(res, ClientResponse);
         assert.property(res.getResponse(), 'transaction', 'Missing transaction id');
         assert.equal(res.getResponse().transaction, this.getId(), 'Invalid transaction id');
-        if(this.state === State.sent) {
+        if(this.state === State.started || this.state === State.receiving) {
+            this.state = State.receiving;
             if(res.isError()) {
                 this.error(new ResponseError(res));
-            } else if(this.ack && res.isAck()) {
-                this.startTimeout();
+            } else if(this.ack === true && res.isAck()) {
+
+                this.ackReceived = true;
                 this.emitter.emit(Event.ack, res);
+                if(this.responseReceived === true) {
+                    this.lateAck = true;
+                    this.end();
+                } else {
+                    this.startTimeout();
+                }
+
             } else {
-                this.end();
+
+                this.responseReceived = true;
                 this.emitter.emit(Event.response, res);
+                if(this.ack === true && this.ackReceived === false) {
+                    this.startTimeout();
+                } else {
+                    this.end();
+                }
             }
         } else {
             this.error(new InvalidTransactionState(this));
@@ -176,3 +198,4 @@ class Transaction {
 module.exports.Transaction = Transaction;
 module.exports.TransactionTimeoutError = TransactionTimeoutError;
 module.exports.InvalidTransactionState = InvalidTransactionState;
+module.exports.TransactionState = State;
