@@ -1,10 +1,10 @@
 {
   "name": "janus-videoroom-client",
-  "version": "2.0.2",
+  "version": "3.2.3",
   "dependencies": {
     "bluebird": {
       "version": "3.4.1",
-      "from": "bluebird@3.4.1",
+      "from": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.1.tgz",
       "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.1.tgz"
     },
     "chai": {
@@ -57,12 +57,12 @@
     },
     "lodash": {
       "version": "4.14.1",
-      "from": "lodash@4.14.1",
+      "from": "https://registry.npmjs.org/lodash/-/lodash-4.14.1.tgz",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.1.tgz"
     },
     "uuid": {
       "version": "2.0.2",
-      "from": "uuid@2.0.2",
+      "from": "https://registry.npmjs.org/uuid/-/uuid-2.0.2.tgz",
       "resolved": "https://registry.npmjs.org/uuid/-/uuid-2.0.2.tgz"
     },
     "validator": {

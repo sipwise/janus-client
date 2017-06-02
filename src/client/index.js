@@ -204,13 +204,8 @@ class Client {
                 case JanusEvents.timeout:
                     this.deleteSession(sessionId);
                     break;
-                case JanusEvents.webrtcup:
-                case JanusEvents.media:
-                case JanusEvents.hangup:
-                    this.sessions[sessionId].event(event);
-                    break;
                 default:
-                    logger.info('Dropped unknown session event', event);
+                    this.sessions[sessionId].event(event);
                     break;
             }
         } else {
