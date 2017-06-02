@@ -85,27 +85,15 @@ class PluginHandle {
     }
 
     event(event) {
-        switch(event.janus) {
-            case JanusEvents.webrtcup:
-                this.connectionState = ConnectionState.connected;
-                this.emitter.emit(JanusEvents.webrtcup, event);
-                break;
-            case JanusEvents.media:
-                this.emitter.emit(JanusEvents.media, event);
-                break;
-            case JanusEvents.hangup:
-                this.connectionState = ConnectionState.disconnected;
-                this.emitter.emit(JanusEvents.hangup, event);
-                break;
-            case JanusEvents.slowlink:
-                this.emitter.emit(JanusEvents.slowlink, event);
-                break;
-            case JanusEvents.event:
-                this.emitter.emit(JanusEvents.event, event);
-                break;
-            default:
-                logger.warn('Dropped unknown handle event', event);
-                break;
+        if(event.janus === JanusEvents.webrtcup) {
+            this.connectionState = ConnectionState.connected;
+        } else if (event.janus === JanusEvents.hangup) {
+            this.connectionState = ConnectionState.disconnected;
+        }
+        if(_.has(JanusEvents, event.janus)) {
+            this.emitter.emit(event.janus, event);
+        } else {
+            this.emitter.emit(JanusEvents.event, event);
         }
     }
 
@@ -123,6 +111,10 @@ class PluginHandle {
 
     onSlowlink(listener) {
         this.emitter.addListener(JanusEvents.slowlink, listener);
+    }
+
+    onDetached(listener) {
+        this.emitter.addListener(JanusEvents.detached, listener);
     }
 
     onEvent(listener) {

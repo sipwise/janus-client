@@ -5,5 +5,6 @@ module.exports.JanusEvents = {
     slowlink: 'slowlink',
     hangup: 'hangup',
     timeout: 'timeout',
-    event: 'event'
+    event: 'event',
+    detached: 'detached'
 };

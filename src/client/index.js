@@ -191,7 +191,7 @@ class Client {
             response = new ClientResponse(transaction.getRequest(), obj);
             transaction.response(response);
         } else if (transactionId !== null) {
-            logger.warn('Dropped response, because transaction does not exists', obj);
+            logger.warn('Rejected response due to none existing session', obj);
         } else {
             this.delegateEvent(obj);
         }
@@ -209,7 +209,7 @@ class Client {
                     break;
             }
         } else {
-            logger.info('Dropped session event, because session does not exists', event);
+            logger.info('Rejected event due to none existing session', event);
         }
     }
 
