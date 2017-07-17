@@ -1,3 +1,21 @@
+janus-client (5.0.0.0+0~mr5.4.1.0) unstable; urgency=medium
+
+  [ Hans-Peter Herzog ]
+  * [7292c34] TT#16508 Fix method, that returns all feeds of a conference
+  * [b035fce] TT#16811 Wait for late acknowledgements to complete transaction without exception
+  * [f39d523] TT#17007 Accept all event types from janus
+  * [2c82982] TT#17060 Accept detached event and forward unknown events
+
+  [ Sergii Kipot ]
+  * [eb76821] TT#15750 Add our own npm registry cache to .npmrc
+
+  [ Victor Seva ]
+  * [26cc3b1] TT#17642 docker: follow policy to include NGCP repository
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Mon, 17 Jul 2017 22:43:04 +0200
+
 janus-client (5.0.0.0+0~mr5.4.0.0) unstable; urgency=medium
 
   [ Hans-Peter Herzog ]
