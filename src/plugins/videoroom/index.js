@@ -2,7 +2,6 @@
 
 var _ = require('lodash');
 var assert = require('chai').assert;
-var validator = require('validator');
 var Plugin = require('../plugin').Plugin;
 var VideoRoomHandle = require('./handle').VideoRoomHandle;
 var VideoRoomPublisher = require('./publisher').VideoRoomPublisher;
@@ -141,11 +140,7 @@ class VideoRoomPlugin extends Plugin {
             }).then((result)=>{
                 if(result.participants.length > 0) {
                     for(let participant of result.participants) {
-                        if(validator.toBoolean(participant.publisher)) {
-                            let feedId;
-                            if(_.isNumber(participant.id)) {
-                                feedId = parseInt()
-                            }
+                        if(participant.publisher === 'true' || participant.publisher === true) {
                             feeds.push(participant.id);
                         }
                     }

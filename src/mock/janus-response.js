@@ -243,7 +243,7 @@ module.exports = {
                         participants: [
                             {
                                 id: 1,
-                                publisher: 'true'
+                                publisher: true
                             },
                             {
                                 id: 2,

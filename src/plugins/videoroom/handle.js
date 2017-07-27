@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('lodash');
-var validator = require('validator');
 var assert = require('chai').assert;
 var Promise = require('bluebird');
 var PluginHandle = require('../handle').PluginHandle;
@@ -62,7 +61,7 @@ class VideoRoomHandle extends PluginHandle {
             }, options);
             this.requestMessage(message).then((res)=>{
                 resolve({
-                    exists: validator.toBoolean(res.getData().exists, true),
+                    exists: (res.getData().exists === 'true' || res.getData().exists === true),
                     response: res
                 });
             }).catch((err)=>{
