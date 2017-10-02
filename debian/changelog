@@ -1,3 +1,15 @@
+janus-client (5.0.0.0+0~mr6.0.0.0) unstable; urgency=medium
+
+  [ Hans-Peter Herzog ]
+  * [9b999c5] TT#19501 Fix conversion issue regarding the latest janus release
+
+  [ Alexander Lutay ]
+  * [ed1ed9a] TT#21905 Switch janus-client Dockerfile to Debian stretch
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Mon, 02 Oct 2017 23:39:03 +0200
+
 janus-client (5.0.0.0+0~mr5.5.0.0) unstable; urgency=medium
 
   [ Hans-Peter Herzog ]
