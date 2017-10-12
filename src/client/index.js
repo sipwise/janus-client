@@ -305,7 +305,10 @@ class Client {
 
     destroySession(id) {
         return new Promise((resolve, reject)=>{
-            this.request({ janus: 'destroy' }).then((res)=>{
+            this.request({ 
+                janus: 'destroy',
+                session_id: id
+            }).then((res)=>{
                 if(res.isSuccess()) {
                     this.deleteSession(id);
                     resolve();
