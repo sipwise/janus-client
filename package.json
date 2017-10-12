@@ -1,6 +1,6 @@
 {
   "name": "janus-videoroom-client",
-  "version": "3.2.5",
+  "version": "3.2.6",
   "main": "src/janus.js",
   "scripts": {
     "test": "mocha -R spec --full-trace test/*-spec.js"
@@ -21,7 +21,7 @@
     "debug-logger": "0.4.1",
     "lodash": "4.14.1",
     "uuid": "2.0.2",
-    "validator": "https://registry.npmjs.org/validator/-/validator-6.1.0.tgz",
+    "validator": "6.1.0",
     "ws": "1.1.1"
   },
   "devDependencies": {
