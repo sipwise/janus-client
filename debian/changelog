@@ -1,3 +1,15 @@
+janus-client (5.0.0.0+0~mr6.0.1.0) unstable; urgency=medium
+
+  [ lu6fer ]
+  * [9d9f735] TT#24086 Add session_id to client.destroySession()
+
+  [ Guillem Jover ]
+  * [5444db9] TT#22072 Update packaging
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Wed, 06 Dec 2017 00:03:30 +0100
+
 janus-client (5.0.0.0+0~mr6.0.0.0) unstable; urgency=medium
 
   [ Hans-Peter Herzog ]
