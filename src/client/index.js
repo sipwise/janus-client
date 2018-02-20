@@ -236,7 +236,7 @@ class Client {
             options.request.token = this.token;
         }
         if(this.apiSecret !== null) {
-            options.apisecret = this.apiSecret;
+            options.request.apisecret = this.apiSecret;
         }
         var transaction = new Transaction(options);
         this.transactions[transaction.getId()] = transaction;
