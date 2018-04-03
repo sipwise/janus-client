@@ -1,3 +1,16 @@
+janus-client (5.0.0.0+0~mr6.3.0.0) unstable; urgency=medium
+
+  [ sol ]
+  * [651fa15] TT#33392 Fix apiSecret handling
+
+  [ Hans-Peter Herzog ]
+  * [abd5242] TT#33392 Bumped package version to be able to release a new version on npm
+  * [2ded31e] TT#33392 Added license file
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Tue, 03 Apr 2018 22:27:31 +0200
+
 janus-client (5.0.0.0+0~mr6.2.0.0) unstable; urgency=medium
 
   * New release.
