@@ -303,9 +303,30 @@ class Client {
         });
     }
 
+    bindSession(id) {
+        if(!this.hasSession(id)) {
+            var session = new Session(id, this);
+            this.addSession(session);
+            this.logger.info('Bind session=%s',session.getId());
+            session.onKeepAlive((result)=>{
+                if(result) {
+                    this.logger.debug('KeepAlive session=%s', session.getId());
+                } else {
+                    this.logger.warn('KeepAlive failed session=%s', session.getId());
+                }
+            });
+            session.onTimeout(()=>{
+                this.logger.info('Timeout session=%s',session.getId());
+                this.deleteSession(session.getId());
+            });
+            return session;
+        }
+        return this.sessions[id];
+    }
+
     destroySession(id) {
         return new Promise((resolve, reject)=>{
-            this.request({ 
+            this.request({
                 janus: 'destroy',
                 session_id: id
             }).then((res)=>{
