@@ -75,6 +75,13 @@ class PluginHandle {
         });
     }
 
+    trickles(candidates) {
+        return this.request({
+            janus: 'trickle',
+            candidates: candidates
+        });
+    }
+
     trickleCompleted() {
         return this.request({
             janus: 'trickle',
