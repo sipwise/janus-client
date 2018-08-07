@@ -112,7 +112,7 @@ class VideoRoomPlugin extends Plugin {
         return new Promise((resolve, reject)=>{
             var handle = null;
             Promise.resolve().then(()=>{
-                return this.createListenerHandle(room);
+                return this.createListenerHandle(room, feed);
             }).then((createdHandle)=>{
                 handle = createdHandle;
                 return handle.createOffer();
