@@ -8,7 +8,7 @@ var logger = require('debug-logger')('janus:videoroom:handle');
 
 var ParticipantType = {
     publisher: 'publisher',
-    listener: 'listener'
+    listener: 'subscriber'
 };
 
 /**
