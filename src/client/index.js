@@ -337,65 +337,23 @@ class Client {
         });
     }
 
-    reconnectHandle(handleInfo) {
+    attachHandle(handleInfo) {
+        var sessionId = handleInfo.session_id;
+        var handleId = handleInfo.handle_id;
+        var plugin = this.sessions[sessionId].videoRoom();
 
         switch(handleInfo.plugin_specific.type) {
             case 'publisher':
-                return this.reconnectPublisherHandle(handleInfo);
+                var room = handleInfo.plugin_specific.room;
+                return plugin.attachPublisherHandle(handleId, room);
             case 'subscriber':
-                return this.reconnectListenerHandle(handleInfo);
+                var room = handleInfo.plugin_specific.room;
+                var feed = handleInfo.plugin_specific.feed_id;
+                return plugin.attachListenerHandle(handleId, room, feed);
             default:
-                return this.reconnectVideoRoomHandle(handleInfo);
+                return plugin.attachVideoRoomHandle(handleId);
         }
 
-    }
-
-    reconnectPublisherHandle(handleInfo) {
-        var sessionId = handleInfo.session_id;
-        var handleId = handleInfo.handle_id;
-        var plugin = this.sessions[sessionId].videoRoom();
-        var room = handleInfo.plugin_specific.room;
-
-        var handle = new VideoRoomPublisher({
-            id: handleId,
-            plugin: plugin,
-            room: room
-        });
-
-        plugin.addHandle(handle);
-        return handle;
-    }
-
-    reconnectListenerHandle(handleInfo) {
-        var sessionId = handleInfo.session_id;
-        var handleId = handleInfo.handle_id;
-        var plugin = this.sessions[sessionId].videoRoom();
-        var room = handleInfo.plugin_specific.room;
-        var feed = handleInfo.plugin_specific.feed_id;
-
-        var handle = new VideoRoomListener({
-            id: handleId,
-            plugin: plugin,
-            room: room,
-            feed: feed
-        });
-
-        plugin.addHandle(handle);
-        return handle;
-    }
-
-    reconnectVideoRoomHandle(handleInfo) {
-        var sessionId = handleInfo.session_id;
-        var handleId = handleInfo.handle_id;
-        var plugin = this.sessions[sessionId].videoRoom();
-
-        var handle = new VideoRoomHandle({
-            id: handleId,
-            plugin: plugin
-        });
-
-        plugin.addHandle(handle);
-        return handle;
     }
 
     destroySession(id) {

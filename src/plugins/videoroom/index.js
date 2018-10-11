@@ -61,6 +61,16 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
+    attachVideoRoomHandle(handleId) {
+        return new Promise((resolve)=>{
+            this.addHandle(new VideoRoomHandle({
+                id: handleId,
+                plugin: this
+            }));
+            resolve(this.getHandle(handleId));
+        });
+    }
+
     createPublisherHandle(room) {
         return new Promise((resolve, reject)=>{
             this.createHandle().then((id)=>{
@@ -73,6 +83,17 @@ class VideoRoomPlugin extends Plugin {
             }).catch((err)=>{
                 reject(err);
             });
+        });
+    }
+
+    attachPublisherHandle(handleId, room) {
+        return new Promise((resolve)=>{
+            this.addHandle(new VideoRoomPublisher({
+                id: handleId,
+                plugin: this,
+                room: room
+            }));
+            resolve(this.getHandle(handleId));
         });
     }
 
@@ -89,6 +110,18 @@ class VideoRoomPlugin extends Plugin {
             }).catch((err)=>{
                 reject(err);
             });
+        });
+    }
+
+    attachListenerHandle(handleId, room, feed) {
+        return new Promise((resolve)=>{
+            this.addHandle(new VideoRoomListener({
+                id: handleId,
+                plugin: this,
+                room: room,
+                feed: feed
+            }));
+            resolve(this.getHandle(handleId));
         });
     }
 
