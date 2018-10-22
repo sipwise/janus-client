@@ -11,6 +11,9 @@ var Session = require('../session').Session;
 var ResponseError = require('../errors').ResponseError;
 var assert = require('chai').assert;
 var JanusEvents = require('../constants').JanusEvents;
+var VideoRoomHandle = require('../plugins/videoroom/handle').VideoRoomHandle;
+var VideoRoomPublisher = require('../plugins/videoroom/publisher').VideoRoomPublisher;
+var VideoRoomListener = require('../plugins/videoroom/listener').VideoRoomListener;
 
 var ConnectionState = {
     connected: 'connected',
@@ -303,9 +306,59 @@ class Client {
         });
     }
 
+    claimSession(sessionId) {
+        return new Promise((resolve, reject)=>{
+            this.request({
+                janus: 'claim',
+                session_id: sessionId
+            }).then((res)=>{
+                if(res.isSuccess()) {
+                    var session = new Session(res.getResponse().session_id, this);
+                    this.addSession(session);
+                    this.logger.info('Claimed session=%s',session.getId());
+                    session.onKeepAlive((result)=>{
+                        if(result) {
+                            this.logger.debug('KeepAlive session=%s', session.getId());
+                        } else {
+                            this.logger.warn('KeepAlive failed session=%s', session.getId());
+                        }
+                    });
+                    session.onTimeout(()=>{
+                        this.logger.info('Timeout session=%s',session.getId());
+                        this.deleteSession(session.getId());
+                    });
+                    resolve(session);
+                } else {
+                    reject(new ResponseError(res));
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
+    attachHandle(handleInfo) {
+        var sessionId = handleInfo.session_id;
+        var handleId = handleInfo.handle_id;
+        var plugin = this.sessions[sessionId].videoRoom();
+
+        switch(handleInfo.plugin_specific.type) {
+            case 'publisher':
+                var room = handleInfo.plugin_specific.room;
+                return plugin.attachPublisherHandle(handleId, room);
+            case 'subscriber':
+                var room = handleInfo.plugin_specific.room;
+                var feed = handleInfo.plugin_specific.feed_id;
+                return plugin.attachListenerHandle(handleId, room, feed);
+            default:
+                return plugin.attachVideoRoomHandle(handleId);
+        }
+
+    }
+
     destroySession(id) {
         return new Promise((resolve, reject)=>{
-            this.request({ 
+            this.request({
                 janus: 'destroy',
                 session_id: id
             }).then((res)=>{
