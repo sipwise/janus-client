@@ -68,11 +68,13 @@ class Session {
         return this.janus.request(obj, options);
     }
 
-    createPluginHandle(plugin) {
+    createPluginHandle(plugin, options) {
+        var opaqueId = options.opaqueId;
         return new Promise((resolve, reject)=>{
             this.request({
                 janus: 'attach',
-                plugin: plugin
+                plugin: plugin,
+                opaque_id: opaqueId
             }).then((res)=>{
                 var handleId = _.get(res.getResponse(), 'data.id', null);
                 if(handleId !== null) {

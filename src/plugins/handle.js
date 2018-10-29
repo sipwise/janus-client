@@ -20,6 +20,7 @@ class PluginHandle {
 
     constructor(options) {
         this.id = options.id;
+        this.opaqueId = options.opaqueId;
         this.plugin = options.plugin;
         this.emitter = new EventEmitter();
         this.connectionState = ConnectionState.disconnected;

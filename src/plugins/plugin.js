@@ -45,9 +45,10 @@ class Plugin {
         this.handles.delete(id);
     }
 
-    createHandle() {
+    createHandle(options) {
         return new Promise((resolve, reject)=>{
-            this.getSession().createPluginHandle(this.getFullName()).then((handleId)=>{
+            this.getSession().createPluginHandle(this.getFullName(), options)
+            .then((handleId)=>{
                 resolve(handleId);
             }).catch((err)=>{
                 reject(err);
