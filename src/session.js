@@ -69,7 +69,7 @@ class Session {
     }
 
     createPluginHandle(plugin, options) {
-        var opaqueId = options.opaqueId;
+        var opaqueId = options ? options.opaqueId : undefined;
         return new Promise((resolve, reject)=>{
             this.request({
                 janus: 'attach',
