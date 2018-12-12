@@ -160,8 +160,8 @@ describe('PluginHandle', function(){
                 assert.equal(res.response.getData().videoroom, 'attached');
                 assert.equal(res.response.getData().room, 123);
                 assert.isNumber(res.response.getData().id);
-                assert.deepProperty(res.response.getResponse(), 'jsep.type');
-                assert.deepProperty(res.response.getResponse(), 'jsep.sdp');
+                assert.nestedProperty(res.response.getResponse(), 'jsep.type');
+                assert.nestedProperty(res.response.getResponse(), 'jsep.sdp');
                 done();
             }).catch((err)=>{
                 done(err);
