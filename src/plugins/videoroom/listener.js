@@ -1,8 +1,7 @@
 'use strict';
 
-var Promise = require('bluebird');
-var logger = require('debug-logger')('janus:videoroom:listener');
-var VideoRoomHandle = require('./handle').VideoRoomHandle;
+const logger = require('debug-logger')('janus:videoroom:listener');
+const VideoRoomHandle = require('./handle').VideoRoomHandle;
 
 /**
  * @class
