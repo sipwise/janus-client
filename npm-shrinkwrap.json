@@ -1,11 +1,16 @@
 {
   "name": "janus-videoroom-client",
-  "version": "3.2.6",
+  "version": "4.0.0",
   "dependencies": {
     "assertion-error": {
-      "version": "1.0.2",
-      "from": "assertion-error@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/assertion-error/-/assertion-error-1.0.2.tgz"
+      "version": "1.1.0",
+      "from": "assertion-error@>=1.1.0 <2.0.0",
+      "resolved": "https://npm-registry.sipwise.com/assertion-error/-/assertion-error-1.1.0.tgz"
+    },
+    "async-limiter": {
+      "version": "1.0.0",
+      "from": "async-limiter@>=1.0.0 <1.1.0",
+      "resolved": "https://registry.npmjs.org/async-limiter/-/async-limiter-1.0.0.tgz"
     },
     "balanced-match": {
       "version": "1.0.0",
@@ -13,32 +18,32 @@
       "resolved": "https://npm-registry.sipwise.com/balanced-match/-/balanced-match-1.0.0.tgz",
       "dev": true
     },
-    "bluebird": {
-      "version": "3.4.1",
-      "from": "bluebird@3.4.1",
-      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.1.tgz"
-    },
     "brace-expansion": {
-      "version": "1.1.8",
+      "version": "1.1.11",
       "from": "brace-expansion@>=1.1.7 <2.0.0",
-      "resolved": "https://npm-registry.sipwise.com/brace-expansion/-/brace-expansion-1.1.8.tgz",
+      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.11.tgz",
       "dev": true
     },
     "browser-stdout": {
-      "version": "1.3.0",
-      "from": "browser-stdout@1.3.0",
-      "resolved": "https://npm-registry.sipwise.com/browser-stdout/-/browser-stdout-1.3.0.tgz",
+      "version": "1.3.1",
+      "from": "browser-stdout@1.3.1",
+      "resolved": "https://registry.npmjs.org/browser-stdout/-/browser-stdout-1.3.1.tgz",
       "dev": true
     },
     "chai": {
-      "version": "3.5.0",
-      "from": "chai@3.5.0",
-      "resolved": "https://registry.npmjs.org/chai/-/chai-3.5.0.tgz"
+      "version": "4.2.0",
+      "from": "chai@latest",
+      "resolved": "https://npm-registry.sipwise.com/chai/-/chai-4.2.0.tgz"
+    },
+    "check-error": {
+      "version": "1.0.2",
+      "from": "check-error@>=1.0.2 <2.0.0",
+      "resolved": "https://npm-registry.sipwise.com/check-error/-/check-error-1.0.2.tgz"
     },
     "commander": {
-      "version": "2.9.0",
-      "from": "commander@2.9.0",
-      "resolved": "https://registry.npmjs.org/commander/-/commander-2.9.0.tgz",
+      "version": "2.15.1",
+      "from": "commander@2.15.1",
+      "resolved": "https://npm-registry.sipwise.com/commander/-/commander-2.15.1.tgz",
       "dev": true
     },
     "concat-map": {
@@ -54,25 +59,18 @@
     },
     "debug-logger": {
       "version": "0.4.1",
-      "from": "debug-logger@0.4.1",
+      "from": "debug-logger@latest",
       "resolved": "https://registry.npmjs.org/debug-logger/-/debug-logger-0.4.1.tgz"
     },
     "deep-eql": {
-      "version": "0.1.3",
-      "from": "deep-eql@>=0.1.3 <0.2.0",
-      "resolved": "https://registry.npmjs.org/deep-eql/-/deep-eql-0.1.3.tgz",
-      "dependencies": {
-        "type-detect": {
-          "version": "0.1.1",
-          "from": "type-detect@0.1.1",
-          "resolved": "https://registry.npmjs.org/type-detect/-/type-detect-0.1.1.tgz"
-        }
-      }
+      "version": "3.0.1",
+      "from": "deep-eql@>=3.0.1 <4.0.0",
+      "resolved": "https://npm-registry.sipwise.com/deep-eql/-/deep-eql-3.0.1.tgz"
     },
     "diff": {
-      "version": "1.4.0",
-      "from": "diff@1.4.0",
-      "resolved": "https://npm-registry.sipwise.com/diff/-/diff-1.4.0.tgz",
+      "version": "3.5.0",
+      "from": "diff@3.5.0",
+      "resolved": "https://registry.npmjs.org/diff/-/diff-3.5.0.tgz",
       "dev": true
     },
     "escape-string-regexp": {
@@ -87,28 +85,33 @@
       "resolved": "https://npm-registry.sipwise.com/fs.realpath/-/fs.realpath-1.0.0.tgz",
       "dev": true
     },
-    "glob": {
-      "version": "7.0.5",
-      "from": "glob@7.0.5",
-      "resolved": "https://npm-registry.sipwise.com/glob/-/glob-7.0.5.tgz",
-      "dev": true
+    "get-func-name": {
+      "version": "2.0.0",
+      "from": "get-func-name@>=2.0.0 <3.0.0",
+      "resolved": "https://npm-registry.sipwise.com/get-func-name/-/get-func-name-2.0.0.tgz"
     },
-    "graceful-readlink": {
-      "version": "1.0.1",
-      "from": "graceful-readlink@>=1.0.0",
-      "resolved": "https://npm-registry.sipwise.com/graceful-readlink/-/graceful-readlink-1.0.1.tgz",
+    "glob": {
+      "version": "7.1.2",
+      "from": "glob@7.1.2",
+      "resolved": "https://npm-registry.sipwise.com/glob/-/glob-7.1.2.tgz",
       "dev": true
     },
     "growl": {
-      "version": "1.9.2",
-      "from": "growl@1.9.2",
-      "resolved": "https://npm-registry.sipwise.com/growl/-/growl-1.9.2.tgz",
+      "version": "1.10.5",
+      "from": "growl@1.10.5",
+      "resolved": "https://registry.npmjs.org/growl/-/growl-1.10.5.tgz",
       "dev": true
     },
     "has-flag": {
-      "version": "1.0.0",
-      "from": "has-flag@>=1.0.0 <2.0.0",
-      "resolved": "https://npm-registry.sipwise.com/has-flag/-/has-flag-1.0.0.tgz",
+      "version": "3.0.0",
+      "from": "has-flag@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-3.0.0.tgz",
+      "dev": true
+    },
+    "he": {
+      "version": "1.1.1",
+      "from": "he@1.1.1",
+      "resolved": "https://npm-registry.sipwise.com/he/-/he-1.1.1.tgz",
       "dev": true
     },
     "inflight": {
@@ -123,74 +126,14 @@
       "resolved": "https://npm-registry.sipwise.com/inherits/-/inherits-2.0.3.tgz",
       "dev": true
     },
-    "json3": {
-      "version": "3.3.2",
-      "from": "json3@3.3.2",
-      "resolved": "https://npm-registry.sipwise.com/json3/-/json3-3.3.2.tgz",
-      "dev": true
-    },
     "lodash": {
-      "version": "4.14.1",
-      "from": "lodash@4.14.1",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.14.1.tgz"
-    },
-    "lodash._baseassign": {
-      "version": "3.2.0",
-      "from": "lodash._baseassign@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash._baseassign/-/lodash._baseassign-3.2.0.tgz",
-      "dev": true
-    },
-    "lodash._basecopy": {
-      "version": "3.0.1",
-      "from": "lodash._basecopy@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash._basecopy/-/lodash._basecopy-3.0.1.tgz",
-      "dev": true
-    },
-    "lodash._basecreate": {
-      "version": "3.0.3",
-      "from": "lodash._basecreate@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash._basecreate/-/lodash._basecreate-3.0.3.tgz",
-      "dev": true
-    },
-    "lodash._getnative": {
-      "version": "3.9.1",
-      "from": "lodash._getnative@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash._getnative/-/lodash._getnative-3.9.1.tgz",
-      "dev": true
-    },
-    "lodash._isiterateecall": {
-      "version": "3.0.9",
-      "from": "lodash._isiterateecall@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash._isiterateecall/-/lodash._isiterateecall-3.0.9.tgz",
-      "dev": true
-    },
-    "lodash.create": {
-      "version": "3.1.1",
-      "from": "lodash.create@3.1.1",
-      "resolved": "https://npm-registry.sipwise.com/lodash.create/-/lodash.create-3.1.1.tgz",
-      "dev": true
-    },
-    "lodash.isarguments": {
-      "version": "3.1.0",
-      "from": "lodash.isarguments@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz",
-      "dev": true
-    },
-    "lodash.isarray": {
-      "version": "3.0.4",
-      "from": "lodash.isarray@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash.isarray/-/lodash.isarray-3.0.4.tgz",
-      "dev": true
-    },
-    "lodash.keys": {
-      "version": "3.1.2",
-      "from": "lodash.keys@>=3.0.0 <4.0.0",
-      "resolved": "https://npm-registry.sipwise.com/lodash.keys/-/lodash.keys-3.1.2.tgz",
-      "dev": true
+      "version": "4.17.11",
+      "from": "lodash@latest",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz"
     },
     "minimatch": {
       "version": "3.0.4",
-      "from": "minimatch@>=3.0.2 <4.0.0",
+      "from": "minimatch@3.0.4",
       "resolved": "https://npm-registry.sipwise.com/minimatch/-/minimatch-3.0.4.tgz",
       "dev": true
     },
@@ -207,21 +150,15 @@
       "dev": true
     },
     "mocha": {
-      "version": "3.0.1",
-      "from": "mocha@3.0.1",
-      "resolved": "https://npm-registry.sipwise.com/mocha/-/mocha-3.0.1.tgz",
+      "version": "5.2.0",
+      "from": "mocha@5.2.0",
+      "resolved": "https://registry.npmjs.org/mocha/-/mocha-5.2.0.tgz",
       "dev": true,
       "dependencies": {
         "debug": {
-          "version": "2.2.0",
-          "from": "debug@2.2.0",
-          "resolved": "https://registry.npmjs.org/debug/-/debug-2.2.0.tgz",
-          "dev": true
-        },
-        "ms": {
-          "version": "0.7.1",
-          "from": "ms@0.7.1",
-          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.1.tgz",
+          "version": "3.1.0",
+          "from": "debug@3.1.0",
+          "resolved": "https://npm-registry.sipwise.com/debug/-/debug-3.1.0.tgz",
           "dev": true
         }
       }
@@ -237,42 +174,37 @@
       "resolved": "https://npm-registry.sipwise.com/once/-/once-1.4.0.tgz",
       "dev": true
     },
-    "options": {
-      "version": "0.0.6",
-      "from": "options@>=0.0.5",
-      "resolved": "https://registry.npmjs.org/options/-/options-0.0.6.tgz"
-    },
     "path-is-absolute": {
       "version": "1.0.1",
       "from": "path-is-absolute@>=1.0.0 <2.0.0",
       "resolved": "https://npm-registry.sipwise.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz",
       "dev": true
     },
+    "pathval": {
+      "version": "1.1.0",
+      "from": "pathval@>=1.1.0 <2.0.0",
+      "resolved": "https://npm-registry.sipwise.com/pathval/-/pathval-1.1.0.tgz"
+    },
     "supports-color": {
-      "version": "3.1.2",
-      "from": "supports-color@3.1.2",
-      "resolved": "https://npm-registry.sipwise.com/supports-color/-/supports-color-3.1.2.tgz",
+      "version": "5.4.0",
+      "from": "supports-color@5.4.0",
+      "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-5.4.0.tgz",
       "dev": true
     },
     "type-detect": {
-      "version": "1.0.0",
-      "from": "type-detect@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/type-detect/-/type-detect-1.0.0.tgz"
-    },
-    "ultron": {
-      "version": "1.0.2",
-      "from": "ultron@>=1.0.0 <1.1.0",
-      "resolved": "https://registry.npmjs.org/ultron/-/ultron-1.0.2.tgz"
+      "version": "4.0.8",
+      "from": "type-detect@>=4.0.5 <5.0.0",
+      "resolved": "https://npm-registry.sipwise.com/type-detect/-/type-detect-4.0.8.tgz"
     },
     "uuid": {
-      "version": "2.0.2",
-      "from": "uuid@2.0.2",
-      "resolved": "https://registry.npmjs.org/uuid/-/uuid-2.0.2.tgz"
+      "version": "3.3.2",
+      "from": "uuid@latest",
+      "resolved": "https://npm-registry.sipwise.com/uuid/-/uuid-3.3.2.tgz"
     },
     "validator": {
-      "version": "6.1.0",
-      "from": "validator@6.1.0",
-      "resolved": "https://registry.npmjs.org/validator/-/validator-6.1.0.tgz"
+      "version": "10.9.0",
+      "from": "validator@latest",
+      "resolved": "https://registry.npmjs.org/validator/-/validator-10.9.0.tgz"
     },
     "wrappy": {
       "version": "1.0.2",
@@ -281,9 +213,9 @@
       "dev": true
     },
     "ws": {
-      "version": "1.1.1",
-      "from": "ws@1.1.1",
-      "resolved": "https://registry.npmjs.org/ws/-/ws-1.1.1.tgz"
+      "version": "6.1.2",
+      "from": "ws@latest",
+      "resolved": "https://npm-registry.sipwise.com/ws/-/ws-6.1.2.tgz"
     }
   }
 }
