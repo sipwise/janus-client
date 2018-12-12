@@ -1,13 +1,13 @@
 'use strict';
 
-var _ = require('lodash');
-var assert = require('chai').assert;
-var Plugin = require('../plugin').Plugin;
-var VideoRoomHandle = require('./handle').VideoRoomHandle;
-var VideoRoomPublisher = require('./publisher').VideoRoomPublisher;
-var VideoRoomListener = require('./listener').VideoRoomListener;
+const _ = require('lodash');
+const assert = require('chai').assert;
+const Plugin = require('../plugin').Plugin;
+const VideoRoomHandle = require('./handle').VideoRoomHandle;
+const VideoRoomPublisher = require('./publisher').VideoRoomPublisher;
+const VideoRoomListener = require('./listener').VideoRoomListener;
 
-var AudioCodec = {
+const AudioCodec = {
     opus: 'opus',
     isac32: 'isac32',
     isac16: 'isac16',
@@ -16,7 +16,7 @@ var AudioCodec = {
     g722: 'g722'
 };
 
-var VideoCodec = {
+const VideoCodec = {
     vp8: 'vp8',
     vp9: 'vp9',
     h264: 'h264'
@@ -32,10 +32,11 @@ class VideoRoomPlugin extends Plugin {
         this.$defaultHandle = null;
     }
 
-    defaultHandle() {
+    defaultHandle(options) {
         return new Promise((resolve, reject)=>{
             if(this.$defaultHandle === null) {
-                this.createVideoRoomHandle().then((handle)=>{
+                this.createVideoRoomHandle(options)
+                .then((handle)=>{
                     this.$defaultHandle = handle;
                     resolve(this.$defaultHandle);
                 }).catch((err)=>{
@@ -47,9 +48,10 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    createVideoRoomHandle() {
+    createVideoRoomHandle(options) {
         return new Promise((resolve, reject)=>{
-            this.createHandle().then((id)=>{
+            this.createHandle(options)
+            .then((id)=>{
                 this.addHandle(new VideoRoomHandle({
                     id: id,
                     plugin: this
@@ -61,13 +63,28 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    createPublisherHandle(room) {
+    attachVideoRoomHandle(handleId, opaqueId) {
+        return new Promise((resolve)=>{
+            this.addHandle(new VideoRoomHandle({
+                id: handleId,
+                plugin: this,
+                opaqueId: opaqueId
+            }));
+            let defaultHandle = this.getHandle(handleId);
+            this.$defaultHandle = defaultHandle;
+            resolve(defaultHandle);
+        });
+    }
+
+    createPublisherHandle(room, opaqueId) {
+        let options = { opaqueId: opaqueId };
         return new Promise((resolve, reject)=>{
-            this.createHandle().then((id)=>{
+            this.createHandle(options).then((id)=>{
                 this.addHandle(new VideoRoomPublisher({
                     id: id,
                     plugin: this,
-                    room: room
+                    room: room,
+                    opaqueId: opaqueId
                 }));
                 resolve(this.getHandle(id));
             }).catch((err)=>{
@@ -76,14 +93,29 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    createListenerHandle(room, feed) {
+    attachPublisherHandle(handleId, room, opaqueId) {
+        return new Promise((resolve)=>{
+            this.addHandle(new VideoRoomPublisher({
+                id: handleId,
+                plugin: this,
+                room: room,
+                opaqueId: opaqueId
+            }));
+            resolve(this.getHandle(handleId));
+        });
+    }
+
+    createListenerHandle(room, feed, opaqueId) {
+        let options = { opaqueId: opaqueId };
         return new Promise((resolve, reject)=>{
-            this.createHandle().then((id)=>{
+            this.createHandle(options)
+            .then((id)=>{
                 this.addHandle(new VideoRoomListener({
                     id: id,
                     plugin: this,
                     room: room,
-                    feed: feed
+                    feed: feed,
+                    opaqueId: opaqueId
                 }));
                 resolve(this.getHandle(id));
             }).catch((err)=>{
@@ -92,11 +124,24 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    publishFeed(room, offer) {
+    attachListenerHandle(handleId, room, feed, opaqueId) {
+        return new Promise((resolve)=>{
+            this.addHandle(new VideoRoomListener({
+                id: handleId,
+                plugin: this,
+                room: room,
+                feed: feed,
+                opaqueId: opaqueId
+            }));
+            resolve(this.getHandle(handleId));
+        });
+    }
+
+    publishFeed(room, offer, opaqueId) {
         return new Promise((resolve, reject)=>{
-            var handle = null;
+            let handle = null;
             Promise.resolve().then(()=>{
-                return this.createPublisherHandle(room);
+                return this.createPublisherHandle(room, opaqueId);
             }).then((createdHandle)=>{
                 handle = createdHandle;
                 return handle.createAnswer(offer);
@@ -108,11 +153,11 @@ class VideoRoomPlugin extends Plugin {
         });
     }
 
-    listenFeed(room, feed) {
+    listenFeed(room, feed, opaqueId) {
         return new Promise((resolve, reject)=>{
-            var handle = null;
+            let handle = null;
             Promise.resolve().then(()=>{
-                return this.createListenerHandle(room, feed);
+                return this.createListenerHandle(room, feed, opaqueId);
             }).then((createdHandle)=>{
                 handle = createdHandle;
                 return handle.createOffer();
@@ -132,7 +177,7 @@ class VideoRoomPlugin extends Plugin {
     getFeeds(room) {
         return new Promise((resolve, reject)=>{
             assert.isNumber(room, 'Missing room id');
-            var feeds = [];
+            let feeds = [];
             Promise.resolve().then(()=>{
                 return this.defaultHandle();
             }).then((handle)=>{

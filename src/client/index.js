@@ -1,23 +1,22 @@
 'use strict';
 
-var _ = require('lodash');
-var WebSocket = require('ws');
-var EventEmitter = require('events').EventEmitter;
-var Promise = require('bluebird');
-var Transaction = require('../transaction').Transaction;
-var logger = require('debug-logger')('janus:client');
-var ClientResponse = require('./response').ClientResponse;
-var Session = require('../session').Session;
-var ResponseError = require('../errors').ResponseError;
-var assert = require('chai').assert;
-var JanusEvents = require('../constants').JanusEvents;
+const _ = require('lodash');
+const WebSocket = require('ws');
+const EventEmitter = require('events').EventEmitter;
+const Transaction = require('../transaction').Transaction;
+const logger = require('debug-logger')('janus:client');
+const ClientResponse = require('./response').ClientResponse;
+const Session = require('../session').Session;
+const ResponseError = require('../errors').ResponseError;
+const assert = require('chai').assert;
+const JanusEvents = require('../constants').JanusEvents;
 
-var ConnectionState = {
+const ConnectionState = {
     connected: 'connected',
     disconnected: 'disconnected'
 };
 
-var ClientEvent = {
+const ClientEvent = {
     connected: 'connected',
     disconnected: 'disconnected',
     object: 'object',
@@ -26,7 +25,7 @@ var ClientEvent = {
     event: 'event'
 };
 
-var WebSocketEvent = {
+const WebSocketEvent = {
     open: 'open',
     message: 'message',
     error: 'error',
@@ -109,8 +108,8 @@ class Client {
     }
 
     close(options) {
-        var connect = _.get(options, 'connect', false);
-        var closeHandler = ()=>{
+        let connect = _.get(options, 'connect', false);
+        let closeHandler = ()=>{
             this.stopConnectionTimeout();
             if(this.webSocket !== null) {
                 this.webSocket.removeAllListeners(WebSocketEvent.open);
@@ -140,7 +139,7 @@ class Client {
 
     message(message) {
         this.startConnectionTimeout();
-        var parsedMessage = message;
+        let parsedMessage = message;
         try {
             if(_.isString(message)) {
                 parsedMessage = JSON.parse(message);
@@ -183,9 +182,9 @@ class Client {
     }
 
     dispatchObject(obj) {
-        var transactionId = _.get(obj, 'transaction', null);
-        var transaction;
-        var response;
+        let transactionId = _.get(obj, 'transaction', null);
+        let transaction;
+        let response;
         if(transactionId !== null && this.transactions[transactionId] instanceof Transaction) {
             transaction = this.transactions[obj.transaction];
             response = new ClientResponse(transaction.getRequest(), obj);
@@ -198,7 +197,7 @@ class Client {
     }
 
     delegateEvent(event) {
-        var sessionId = _.get(event, 'session_id', null);
+        let sessionId = _.get(event, 'session_id', null);
         if(sessionId !== null && this.hasSession(sessionId)) {
             switch(event.janus) {
                 case JanusEvents.timeout:
@@ -238,15 +237,15 @@ class Client {
         if(this.apiSecret !== null) {
             options.request.apisecret = this.apiSecret;
         }
-        var transaction = new Transaction(options);
+        let transaction = new Transaction(options);
         this.transactions[transaction.getId()] = transaction;
         return transaction;
     }
 
     request(req, options) {
         return new Promise((resolve, reject)=>{
-            var ack = _.get(options, 'ack', false);
-            var transaction = this.createTransaction({
+            let ack = _.get(options, 'ack', false);
+            let transaction = this.createTransaction({
                 request: req,
                 client: this,
                 ack: ack
@@ -279,7 +278,7 @@ class Client {
         return new Promise((resolve, reject)=>{
             this.request({ janus: 'create' }).then((res)=>{
                 if(res.isSuccess()) {
-                    var session = new Session(res.getResponse().data.id, this);
+                    let session = new Session(res.getResponse().data.id, this);
                     this.addSession(session);
                     this.logger.info('Created session=%s',session.getId());
                     session.onKeepAlive((result)=>{
@@ -303,9 +302,40 @@ class Client {
         });
     }
 
+    claimSession(sessionId) {
+        return new Promise((resolve, reject)=>{
+            this.request({
+                janus: 'claim',
+                session_id: sessionId
+            }).then((res)=>{
+                if(res.isSuccess()) {
+                    let session = new Session(res.getResponse().session_id, this);
+                    this.addSession(session);
+                    this.logger.info('Claimed session=%s',session.getId());
+                    session.onKeepAlive((result)=>{
+                        if(result) {
+                            this.logger.debug('KeepAlive session=%s', session.getId());
+                        } else {
+                            this.logger.warn('KeepAlive failed session=%s', session.getId());
+                        }
+                    });
+                    session.onTimeout(()=>{
+                        this.logger.info('Timeout session=%s',session.getId());
+                        this.deleteSession(session.getId());
+                    });
+                    resolve(session);
+                } else {
+                    reject(new ResponseError(res));
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+
     destroySession(id) {
         return new Promise((resolve, reject)=>{
-            this.request({ 
+            this.request({
                 janus: 'destroy',
                 session_id: id
             }).then((res)=>{
