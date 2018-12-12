@@ -1,7 +1,7 @@
 'use strict';
 
-const assert = require('chai').assert;
-const _ = require('lodash');
+var assert = require('chai').assert;
+var _ = require('lodash');
 
 /**
  * @class

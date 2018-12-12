@@ -1,10 +1,10 @@
 'use strict';
 
-const _ = require('lodash');
-const http = require('http');
-const WebSocketServer = require('ws').Server;
-const JanusResponse = require('../mock/janus-response');
-const logger = require('debug-logger')('mock:janus-server');
+var _ = require('lodash');
+var http = require('http');
+var WebSocketServer = require('ws').Server;
+var JanusResponse = require('../mock/janus-response');
+var logger = require('debug-logger')('mock:janus-server');
 
 /**
  * @class
@@ -88,7 +88,7 @@ class JanusServer {
                 this.send(webSocket, JanusResponse.handle.trickle(object));
                 break;
             case 'message':
-                let plugin = this.handlesById[object.handle_id];
+                var plugin = this.handlesById[object.handle_id];
                 switch(plugin) {
                     case 'janus.plugin.videoroom':
                         this.dispatchVideoRoom(webSocket, object);

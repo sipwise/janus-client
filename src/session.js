@@ -1,11 +1,12 @@
 'use strict';
 
-const _ = require('lodash');
-const EventEmitter = require('events').EventEmitter;
-const logger = require('debug-logger')('janus:session');
-const VideoRoomPlugin = require('./plugins/videoroom').VideoRoomPlugin;
+var _ = require('lodash');
+var Promise = require('bluebird');
+var EventEmitter = require('events').EventEmitter;
+var logger = require('debug-logger')('janus:session');
+var VideoRoomPlugin = require('./plugins/videoroom').VideoRoomPlugin;
 
-const State = {
+var State = {
     alive: 'alive',
     dying: 'dying',
     dead: 'dead'
@@ -67,15 +68,13 @@ class Session {
         return this.janus.request(obj, options);
     }
 
-    createPluginHandle(plugin, options) {
-        let opaqueId = options ? options.opaqueId : undefined;
+    createPluginHandle(plugin) {
         return new Promise((resolve, reject)=>{
             this.request({
                 janus: 'attach',
-                plugin: plugin,
-                opaque_id: opaqueId
+                plugin: plugin
             }).then((res)=>{
-                let handleId = _.get(res.getResponse(), 'data.id', null);
+                var handleId = _.get(res.getResponse(), 'data.id', null);
                 if(handleId !== null) {
                     logger.info('Created handle plugin=%s handle=%s', plugin, handleId);
                     resolve(handleId);
