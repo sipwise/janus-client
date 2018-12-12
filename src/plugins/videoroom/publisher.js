@@ -1,8 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
-const logger = require('debug-logger')('janus:videoroom:publisher');
-const VideoRoomHandle = require('./handle').VideoRoomHandle;
+var _ = require('lodash');
+var Promise = require('bluebird');
+var logger = require('debug-logger')('janus:videoroom:publisher');
+var VideoRoomHandle = require('./handle').VideoRoomHandle;
 
 /**
  * @class

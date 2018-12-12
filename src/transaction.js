@@ -1,14 +1,14 @@
 'use strict';
 
-const path = require('path');
-const _ = require('lodash');
-const createId = require('uuid');
-const EventEmitter = require('events').EventEmitter;
-const ResponseError = require('./errors').ResponseError;
-const assert = require('chai').assert;
-const ClientResponse = require('./client/response').ClientResponse;
+var path = require('path');
+var _ = require('lodash');
+var createId = require('uuid');
+var EventEmitter = require('events').EventEmitter;
+var ResponseError = require('./errors').ResponseError;
+var assert = require('chai').assert;
+var ClientResponse = require('./client/response').ClientResponse;
 
-const State = {
+var State = {
     new: 'new',
     started: 'started',
     sent: 'sent',
@@ -16,7 +16,7 @@ const State = {
     ended: 'ended'
 };
 
-const Event = {
+var Event = {
     response: 'response',
     ack: 'ack',
     end: 'end',

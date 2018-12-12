@@ -1,13 +1,14 @@
 'use strict';
 
-const _ = require('lodash');
-const assert = require('chai').assert;
-const PluginHandle = require('../handle').PluginHandle;
-const logger = require('debug-logger')('janus:videoroom:handle');
+var _ = require('lodash');
+var assert = require('chai').assert;
+var Promise = require('bluebird');
+var PluginHandle = require('../handle').PluginHandle;
+var logger = require('debug-logger')('janus:videoroom:handle');
 
-const ParticipantType = {
+var ParticipantType = {
     publisher: 'publisher',
-    listener: 'subscriber'
+    listener: 'listener'
 };
 
 /**
@@ -22,7 +23,7 @@ class VideoRoomHandle extends PluginHandle {
     create(options) {
         return new Promise((resolve, reject)=>{
             options = options || {};
-            let message = _.merge({
+            var message = _.merge({
                 request: 'create'
             }, options);
             this.requestMessage(message).then((res)=>{
@@ -39,7 +40,7 @@ class VideoRoomHandle extends PluginHandle {
     destroy(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            let message = _.merge({
+            var message = _.merge({
                 request: 'destroy'
             }, options);
             this.requestMessage(message).then((res)=>{
@@ -55,7 +56,7 @@ class VideoRoomHandle extends PluginHandle {
     exists(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            let message = _.merge({
+            var message = _.merge({
                 request: 'exists'
             }, options);
             this.requestMessage(message).then((res)=>{
@@ -87,7 +88,7 @@ class VideoRoomHandle extends PluginHandle {
     listParticipants(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            let message = _.merge({
+            var message = _.merge({
                 request: 'listparticipants'
             }, options);
             this.requestMessage(message).then((res)=>{
@@ -105,7 +106,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
             assert.property(options, 'ptype');
-            let message = _.merge({
+            var message = _.merge({
                 request: 'join'
             }, options);
             this.requestMessage(message, {
@@ -125,7 +126,7 @@ class VideoRoomHandle extends PluginHandle {
     joinPublisher(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            let joinOptions = _.merge({
+            var joinOptions = _.merge({
                 ptype: ParticipantType.publisher
             }, options);
             this.join(joinOptions, {
@@ -142,7 +143,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
             assert.property(options, 'feed');
-            let joinOptions = _.merge({
+            var joinOptions = _.merge({
                 ptype: ParticipantType.listener
             }, options);
             this.join(joinOptions, {
@@ -159,7 +160,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             options.audio = _.get(options, 'audio', true);
             options.video = _.get(options, 'video', true);
-            let message = _.merge({
+            var message = _.merge({
                 request: 'configure'
             }, options);
             this.requestMessage(message, {
@@ -180,7 +181,7 @@ class VideoRoomHandle extends PluginHandle {
             assert.property(options, 'jsep');
             options.audio = _.get(options, 'audio', true);
             options.video = _.get(options, 'video', true);
-            let message = _.merge({
+            var message = _.merge({
                 request: 'joinandconfigure',
                 ptype: 'publisher'
             }, options);
@@ -202,7 +203,7 @@ class VideoRoomHandle extends PluginHandle {
     publish(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'jsep');
-            let message = _.merge({
+            var message = _.merge({
                 request: 'publish'
             }, options);
             this.requestMessage(message, {
@@ -219,7 +220,7 @@ class VideoRoomHandle extends PluginHandle {
 
     unpublish(options) {
         return new Promise((resolve, reject)=>{
-            let message = _.merge({
+            var message = _.merge({
                 request: 'unpublish'
             }, options);
             this.requestMessage(message, {
@@ -238,7 +239,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
             assert.property(options, 'jsep');
-            let message = _.merge({
+            var message = _.merge({
                 request: 'start'
             }, options);
             this.requestMessage(message, {
@@ -260,7 +261,7 @@ class VideoRoomHandle extends PluginHandle {
      */
     pause(options) {
         return new Promise((resolve, reject)=>{
-            let message = _.merge({
+            var message = _.merge({
                 request: 'pause'
             }, options);
             this.requestMessage(message, {
@@ -277,7 +278,7 @@ class VideoRoomHandle extends PluginHandle {
 
     switch(options) {
         return new Promise((resolve, reject)=>{
-            let message = _.merge({
+            var message = _.merge({
                 request: 'switch'
             }, options);
             this.requestMessage(message, {
@@ -299,7 +300,7 @@ class VideoRoomHandle extends PluginHandle {
      */
     stop(options) {
         return new Promise((resolve, reject)=>{
-            let message = _.merge({
+            var message = _.merge({
                 request: 'stop'
             }, options);
             this.requestMessage(message, {
@@ -316,7 +317,7 @@ class VideoRoomHandle extends PluginHandle {
 
     add(options) {
         return new Promise((resolve, reject)=>{
-            let message = _.merge({
+            var message = _.merge({
                 request: 'add'
             }, options);
             this.requestMessage(message, {
@@ -333,7 +334,7 @@ class VideoRoomHandle extends PluginHandle {
 
     remove(options) {
         return new Promise((resolve, reject)=>{
-            let message = _.merge({
+            var message = _.merge({
                 request: 'remove'
             }, options);
             this.requestMessage(message, {
@@ -350,7 +351,7 @@ class VideoRoomHandle extends PluginHandle {
 
     leave(options) {
         return new Promise((resolve, reject)=>{
-            let message = _.merge({
+            var message = _.merge({
                 request: 'leave'
             }, options);
             this.requestMessage(message, {

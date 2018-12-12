@@ -1,6 +1,6 @@
 {
   "name": "janus-videoroom-client",
-  "version": "4.0.0",
+  "version": "3.2.8",
   "main": "src/janus.js",
   "scripts": {
     "test": "mocha -R spec --full-trace test/*-spec.js"
@@ -16,14 +16,15 @@
     "url": "https://github.com/sipwise/janus-client.git"
   },
   "dependencies": {
-    "chai": "4.2.0",
+    "bluebird": "3.4.1",
+    "chai": "3.5.0",
     "debug-logger": "0.4.1",
-    "lodash": "4.17.11",
-    "uuid": "3.3.2",
-    "validator": "10.9.0",
-    "ws": "6.1.2"
+    "lodash": "4.14.1",
+    "uuid": "2.0.2",
+    "validator": "6.1.0",
+    "ws": "1.1.1"
   },
   "devDependencies": {
-    "mocha": "5.2.0"
+    "mocha": "3.0.1"
   }
 }

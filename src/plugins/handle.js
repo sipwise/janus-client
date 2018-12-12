@@ -1,11 +1,12 @@
 'use strict';
 
-const _ = require('lodash');
-const EventEmitter = require('events').EventEmitter;
-const JanusEvents = require('../constants').JanusEvents;
-const logger = require('debug-logger')('janus:handle');
-const PluginError = require('../errors').PluginError;
-const PluginResponse = require('../client/response').PluginResponse;
+var _ = require('lodash');
+var Promise = require('bluebird');
+var EventEmitter = require('events').EventEmitter;
+var JanusEvents = require('../constants').JanusEvents;
+var logger = require('debug-logger')('janus:handle');
+var PluginError = require('../errors').PluginError;
+var PluginResponse = require('../client/response').PluginResponse;
 
 const ConnectionState = {
     connected: 'connected',
@@ -19,7 +20,6 @@ class PluginHandle {
 
     constructor(options) {
         this.id = options.id;
-        this.opaqueId = options.opaqueId;
         this.plugin = options.plugin;
         this.emitter = new EventEmitter();
         this.connectionState = ConnectionState.disconnected;
@@ -72,13 +72,6 @@ class PluginHandle {
         return this.request({
             janus: 'trickle',
             candidate: candidate
-        });
-    }
-
-    trickles(candidates) {
-        return this.request({
-            janus: 'trickle',
-            candidates: candidates
         });
     }
 
@@ -136,8 +129,8 @@ class PluginHandle {
     requestMessage(body, options) {
         return new Promise((resolve, reject)=>{
             options = options || {};
-            let jsep = _.get(body, 'jsep', null);
-            let req = {
+            var jsep = _.get(body, 'jsep', null);
+            var req = {
                 janus: 'message',
                 body: body
             };
@@ -146,7 +139,7 @@ class PluginHandle {
                 delete body.jsep;
             }
             this.request(req, options).then((res)=>{
-                let pluginResponse = new PluginResponse(res.getRequest(), res.getResponse());
+                var pluginResponse = new PluginResponse(res.getRequest(), res.getResponse());
                 if(pluginResponse.isError()) {
                     reject(new PluginError(res, this));
                 } else {

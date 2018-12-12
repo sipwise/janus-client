@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
-const EventEmitter = require('events').EventEmitter;
-const JanusResponse = require('../mock/janus-response');
+var _ = require('lodash');
+var EventEmitter = require('events').EventEmitter;
+var JanusResponse = require('../mock/janus-response');
 
 const Plugins = {
     janus_plugin_videoroom: 'janus.plugin.videoroom'
@@ -41,7 +41,7 @@ class WebSocketMock {
 
     send(message, cb) {
         console.log(message);
-        let parsedMessage = message;
+        var parsedMessage = message;
         if(_.isString(message)) {
             parsedMessage = JSON.parse(message);
         }
