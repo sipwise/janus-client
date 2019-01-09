@@ -181,6 +181,7 @@ class VideoRoomHandle extends PluginHandle {
             assert.property(options, 'jsep');
             options.audio = _.get(options, 'audio', true);
             options.video = _.get(options, 'video', true);
+            options.data = _.get(options, 'data', true);
             let message = _.merge({
                 request: 'joinandconfigure',
                 ptype: 'publisher'
