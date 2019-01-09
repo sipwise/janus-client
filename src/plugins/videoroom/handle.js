@@ -159,6 +159,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             options.audio = _.get(options, 'audio', true);
             options.video = _.get(options, 'video', true);
+            options.data = _.get(options, 'data', true);
             let message = _.merge({
                 request: 'configure'
             }, options);
