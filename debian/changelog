@@ -1,3 +1,18 @@
+janus-client (5.0.0.0+0~mr7.2.0.0) unstable; urgency=medium
+
+  [ Cédric ]
+  * [dc823a0] TT#48852 JanusClient: Integrate pull request 8 partially
+
+  [ Hans-Peter Herzog ]
+  * [ecd28bc] TT#48636 JanusClient: Create new major release 4.x.x
+  * [cc0266c] TT#48636 JanusClient: Create new major release 4.x.x
+  * [607ccf5] TT#48636 JanusClient: Create new major release 4.x.x (Revert)
+  * [d93f282] TT#48636 JanusClient: Create new major release 4.x.x
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Wed, 09 Jan 2019 21:56:52 +0100
+
 janus-client (5.0.0.0+0~mr7.1.0.0) unstable; urgency=medium
 
   * New release.
