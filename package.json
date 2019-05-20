@@ -1,6 +1,6 @@
 {
   "name": "janus-videoroom-client",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "main": "src/janus.js",
   "scripts": {
     "test": "mocha -R spec --full-trace test/*-spec.js"
