@@ -1,3 +1,12 @@
+janus-client (5.0.0.0+0~mr7.5.0.0) unstable; urgency=medium
+
+  [ Hans-Peter Herzog ]
+  * [1d57272] TT#56359 Create new minor release 4.1.x
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Mon, 17 Jun 2019 14:35:32 +0200
+
 janus-client (5.0.0.0+0~mr7.4.0.0) unstable; urgency=medium
 
   * New release.
