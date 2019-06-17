@@ -6,5 +6,6 @@ module.exports.JanusEvents = {
     hangup: 'hangup',
     timeout: 'timeout',
     event: 'event',
-    detached: 'detached'
+    detached: 'detached',
+    trickle: 'trickle'
 };

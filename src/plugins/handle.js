@@ -128,6 +128,10 @@ class PluginHandle {
         this.emitter.addListener(JanusEvents.event, listener);
     }
 
+    onTrickle(listener) {
+        this.emitter.addListener(JanusEvents.trickle, listener);
+    }
+
     request(obj, options) {
         obj.handle_id = this.getId();
         return this.getPlugin().getSession().request(obj, options);
