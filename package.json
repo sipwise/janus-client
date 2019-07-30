@@ -1,9 +1,9 @@
 {
   "name": "janus-videoroom-client",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "main": "src/janus.js",
   "scripts": {
-    "test": "mocha -R spec --full-trace test/*-spec.js"
+    "test": "mocha -b --exit -R spec --full-trace test/*-spec.js"
   },
   "author": "Hans-Peter Herzog <hherzog@sipwise.com>",
   "license": "GPL-3.0",
@@ -18,12 +18,12 @@
   "dependencies": {
     "chai": "4.2.0",
     "debug-logger": "0.4.1",
-    "lodash": "4.17.11",
+    "lodash": "4.17.15",
     "uuid": "3.3.2",
-    "validator": "10.9.0",
-    "ws": "6.1.2"
+    "validator": "11.1.0",
+    "ws": "7.1.1"
   },
   "devDependencies": {
-    "mocha": "5.2.0"
+    "mocha": "6.2.0"
   }
 }
