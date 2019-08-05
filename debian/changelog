@@ -1,3 +1,19 @@
+janus-client (5.0.0.0+0~mr7.5.1.0) unstable; urgency=medium
+
+  [ Alexander Lutay ]
+  * [7cfa94e] TT#60950 Switch janus-client docker to buster
+
+  [ Guillem Jover ]
+  * [4bc229e] TT#61954 Update copyright years
+  * [be6da24] TT#61954 Set debhelper compat level in Build-Depends instead of debian/compat
+
+  [ Hans-Peter Herzog ]
+  * [f195b58] TT#63760 Update package dependencies
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Mon, 05 Aug 2019 20:54:10 +0200
+
 janus-client (5.0.0.0+0~mr7.5.0.0) unstable; urgency=medium
 
   [ Hans-Peter Herzog ]
