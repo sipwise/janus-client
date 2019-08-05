@@ -20,7 +20,7 @@ RUN echo "cd /code && ./t/testrunner" >/root/.bash_history
 
 # we cannot use /code/ here otherwise it will be 'mounted over' with following 'docker run'
 ADD package.json /tmp/
-ADD npm-shrinkwrap.json /tmp/
+ADD package-lock.json /tmp/
 ADD README.md /tmp/
 WORKDIR /tmp
 RUN npm install /tmp
