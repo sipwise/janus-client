@@ -1,0 +1,7 @@
+Verified+1: Jenkins Jenkins
+Code-Review+2: Alexander Lutay <alutay@sipwise.com>
+Submitted-by: Hans-Peter Herzog <hherzog@sipwise.com>
+Submitted-at: Tue, 13 Aug 2019 13:09:38 +0200
+Reviewed-on: http://gerrit.mgm.sipwise.com/c/janus-client/+/32342
+Project: janus-client
+Branch: refs/heads/mr7.5
