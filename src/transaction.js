@@ -94,11 +94,12 @@ class Transaction {
         if(this.state === State.new) {
             this.state = State.started;
             this.startTimeout();
-            this.client.sendObject(this.getRequest()).then(()=>{
+            try {
+                this.client.sendObject(this.getRequest());
                 this.emitter.emit('sent', this.getRequest());
-            }).catch((err)=>{
+            } catch (err) {
                 this.error(err);
-            });
+            }
         } else {
             this.error(new InvalidTransactionState(this));
         }
