@@ -1,3 +1,15 @@
+janus-client (5.0.0.0+0~mr7.5.1.1) unstable; urgency=medium
+
+  [ Alexander Lutay ]
+  * [5869615] TT#63760 Fix f195b585c: user package-lock.json instead of removed npm-shrinkwrap.json
+
+  [ Hans-Peter Herzog ]
+  * [861aea1] TT#64704 Force npm cli to download packages from sipwise npm mirror
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Sun, 01 Sep 2019 21:48:54 +0200
+
 janus-client (5.0.0.0+0~mr7.5.1.0) unstable; urgency=medium
 
   [ Alexander Lutay ]
