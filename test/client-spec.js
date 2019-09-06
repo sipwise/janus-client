@@ -15,18 +15,25 @@ var request = {
 var mockServerPort = config.janus.server.port;
 var mockServerUrl = config.janus.server.url;
 
+var brokenMockServerPort = config.janus.server.port + 1;
+var brokenMockServerUrl = 'http://localhost:' + brokenMockServerPort;
+
 describe('Client', function() {
 
     var janusServerMock;
+    var brokenJanusServerMock;
     before(function(done){
         janusServerMock = new JanusServerMock({
             port: mockServerPort
         });
-        janusServerMock.init().then(()=>{
-            done();
-        }).catch(()=>{
-            done(err);
+        brokenJanusServerMock = new JanusServerMock({
+            port: brokenMockServerPort,
+            triggerHandshakeTimeout: true
         });
+        Promise.all([
+            janusServerMock.init(),
+            brokenJanusServerMock.init()
+        ]).then(() => done()).catch((e) => done(e));
     });
 
     after(function(){
@@ -100,6 +107,44 @@ describe('Client', function() {
                 done();
             }
         });
+        client.connect();
+    });
+
+    it('should not throw uncaught exception on initial websocket connection timeout', function(done) {
+
+        var client = new Client({
+            url: brokenMockServerUrl,
+            reconnect: true,
+            connectionTimeout: 200,
+            handshakeTimeout: 300
+        });
+        var handshakeTimeoutError = 'Opening handshake has timed out';
+        var earlyCloseError = 'WebSocket was closed before the connection was established';
+        var caughtError = false
+        var isDone = false
+
+        function onUncaughtException(err) {
+            if (isDone) { return; }
+            isDone = true;
+            process.off('uncaughtException', onUncaughtException);
+            var msg = err.message;
+            done(new Error('Client should not cause uncaught exception: ' + msg));
+        }
+
+        client.onError((err) => {
+            if (isDone) { return; }
+            var msg = err.message;
+            caughtError = msg === handshakeTimeoutError || msg === earlyCloseError;
+            if (caughtError) {
+                isDone = true;
+                process.off('uncaughtException', onUncaughtException);
+                done();
+            }
+
+        });
+
+        process.on('uncaughtException', onUncaughtException)
+
         client.connect();
     });
 

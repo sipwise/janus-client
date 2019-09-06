@@ -71,6 +71,7 @@ class Client {
         this.reconnect = _.isBoolean(options.reconnect)? options.reconnect : true;
         this.token = _.get(options, 'token', null);
         this.apiSecret = _.get(options, 'apiSecret', null);
+        this.handshakeTimeout = _.get(options, 'handshakeTimeout', undefined);
     }
 
     getVersion() {
@@ -83,7 +84,10 @@ class Client {
 
     connect() {
         if(this.webSocket === null) {
-            this.webSocket = new this.WebSocket(this.url, this.protocol);
+            var opts = this.handshakeTimeout ?
+                { handshakeTimeout: this.handshakeTimeout } :
+                undefined;
+            this.webSocket = new this.WebSocket(this.url, this.protocol, opts);
             this.webSocket.on(WebSocketEvent.open, ()=>{ this.open(); });
             this.webSocket.on(WebSocketEvent.close, ()=>{ this.close(); });
             this.webSocket.on(WebSocketEvent.message, (message)=>{ this.message(message); });
