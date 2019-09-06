@@ -18,6 +18,10 @@ var mockServerUrl = config.janus.server.url;
 var brokenMockServerPort = config.janus.server.port + 1;
 var brokenMockServerUrl = 'http://localhost:' + brokenMockServerPort;
 
+var handshakeTimeoutError = 'Opening handshake has timed out';
+var earlyCloseError = 'WebSocket was closed before the connection was established';
+
+
 describe('Client', function() {
 
     var janusServerMock;
@@ -38,6 +42,7 @@ describe('Client', function() {
 
     after(function(){
         janusServerMock.close();
+        brokenJanusServerMock.close();
     });
 
     it('should connect to websocket endpoint', function(done) {
@@ -110,42 +115,45 @@ describe('Client', function() {
         client.connect();
     });
 
-    it('should not throw uncaught exception on initial websocket connection timeout', function(done) {
+    [
+        {when: 'after', connectionTimeout: 200, handshakeTimeout: 300, expectedError: earlyCloseError},
+        {when: 'before', connectionTimeout: 300, handshakeTimeout: 200, expectedError: handshakeTimeoutError}
+    ].forEach((test) => {
+        it(`does not throw uncaught exception if handshake timeout occurs ${test.when} connection timeout`, function(done) {
 
-        var client = new Client({
-            url: brokenMockServerUrl,
-            reconnect: true,
-            connectionTimeout: 200,
-            handshakeTimeout: 300
-        });
-        var handshakeTimeoutError = 'Opening handshake has timed out';
-        var earlyCloseError = 'WebSocket was closed before the connection was established';
-        var caughtError = false
-        var isDone = false
+            var client = new Client({
+                url: brokenMockServerUrl,
+                reconnect: true,
+                connectionTimeout: test.connectionTimeout,
+                handshakeTimeout: test.handshakeTimeout,
+            });
+            var caughtError = false
+            var isDone = false
 
-        function onUncaughtException(err) {
-            if (isDone) { return; }
-            isDone = true;
-            process.off('uncaughtException', onUncaughtException);
-            var msg = err.message;
-            done(new Error('Client should not cause uncaught exception: ' + msg));
-        }
-
-        client.onError((err) => {
-            if (isDone) { return; }
-            var msg = err.message;
-            caughtError = msg === handshakeTimeoutError || msg === earlyCloseError;
-            if (caughtError) {
+            function onUncaughtException(err) {
+                if (isDone) { return; }
                 isDone = true;
                 process.off('uncaughtException', onUncaughtException);
-                done();
+                var msg = err.message;
+                done(new Error('Client should not cause uncaught exception: ' + msg));
             }
 
+            client.onError((err) => {
+                if (isDone) { return; }
+                var msg = err.message;
+                caughtError = msg === test.expectedError;
+                if (caughtError) {
+                    isDone = true;
+                    process.off('uncaughtException', onUncaughtException);
+                    done();
+                }
+
+            });
+
+            process.on('uncaughtException', onUncaughtException)
+
+            client.connect();
         });
-
-        process.on('uncaughtException', onUncaughtException)
-
-        client.connect();
     });
 
     it('should fail sending an object, because client is disconnected', function(done){
