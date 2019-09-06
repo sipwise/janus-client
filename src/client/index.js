@@ -82,6 +82,14 @@ class Client {
         return _.isObject(this.webSocket) && this.webSocket.readyState === 1;
     }
 
+    isConnecting() {
+        return _.isObject(this.webSocket) && this.webSocket.readyState === 0;
+    }
+
+    isClosing() {
+        return _.isObject(this.webSocket) && this.webSocket.readyState === 2;
+    }
+
     connect() {
         if(this.webSocket === null) {
             var opts = this.handshakeTimeout ?
@@ -113,7 +121,12 @@ class Client {
     }
 
     close(options) {
+        // When the connection finishes closing the onClose event handler
+        // will re-trigger this clean up.
+        if (this.isClosing()) { return; }
+
         let connect = _.get(options, 'connect', false);
+
         let closeHandler = ()=>{
             this.stopConnectionTimeout();
             if(this.webSocket !== null) {
@@ -131,11 +144,10 @@ class Client {
                 this.connect();
             }
         };
-        if(_.isObject(this.webSocket) && this.isConnected()) {
+
+        if(this.isConnected() || this.isConnecting()) {
             this.webSocket.removeAllListeners('close');
-            this.webSocket.on('close', ()=>{
-                closeHandler();
-            });
+            this.webSocket.on('close', () => closeHandler());
             this.webSocket.close();
         } else {
             closeHandler();
