@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const assert = require('chai').assert;
 const Plugin = require('../plugin').Plugin;
 const VideoRoomHandle = require('./handle').VideoRoomHandle;
 const VideoRoomPublisher = require('./publisher').VideoRoomPublisher;
@@ -176,7 +175,6 @@ class VideoRoomPlugin extends Plugin {
      */
     getFeeds(room) {
         return new Promise((resolve, reject)=>{
-            assert.isNumber(room, 'Missing room id');
             let feeds = [];
             Promise.resolve().then(()=>{
                 return this.defaultHandle();
@@ -204,8 +202,6 @@ class VideoRoomPlugin extends Plugin {
      * @returns {Promise}
      */
     getFeedsExclude(room, feed) {
-        assert.isNumber(room, 'Missing room id');
-        assert.isNumber(feed, 'Missing feed to exclude');
         return new Promise((resolve, reject)=>{
             this.getFeeds(room).then((feeds)=>{
                 resolve(_.remove(feeds, ($feed)=>{
