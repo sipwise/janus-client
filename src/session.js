@@ -101,8 +101,13 @@ class Session {
     }
 
     timeout() {
-        this.destroy();
-        this.emitter.emit('timeout');
+        this.destroy().then(()=>{
+            logger.debug('Destroyed session=%s', this.id);
+            this.emitter.emit('timeout');
+        }).catch(()=>{
+            logger.debug('Failed to destroy session=%s', this.id);
+            this.emitter.emit('timeout');
+        });
     }
 
     onTimeout(listener) {
