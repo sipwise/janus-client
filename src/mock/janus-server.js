@@ -12,8 +12,13 @@ const logger = require('debug-logger')('mock:janus-server');
 class JanusServer {
 
     constructor(options) {
+        var triggerHandshakeTimeout = options.triggerHandshakeTimeout;
+
         this.port = options.port || 9002;
         this.http = http.createServer();
+
+        if (triggerHandshakeTimeout) { return; }
+
         this.ws = new WebSocketServer({
             server: this.http
         });
