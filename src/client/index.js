@@ -71,6 +71,7 @@ class Client {
         this.reconnect = _.isBoolean(options.reconnect)? options.reconnect : true;
         this.token = _.get(options, 'token', null);
         this.apiSecret = _.get(options, 'apiSecret', null);
+        this.handshakeTimeout = _.get(options, 'handshakeTimeout', undefined);
     }
 
     getVersion() {
@@ -81,9 +82,20 @@ class Client {
         return _.isObject(this.webSocket) && this.webSocket.readyState === 1;
     }
 
+    isConnecting() {
+        return _.isObject(this.webSocket) && this.webSocket.readyState === 0;
+    }
+
+    isClosing() {
+        return _.isObject(this.webSocket) && this.webSocket.readyState === 2;
+    }
+
     connect() {
         if(this.webSocket === null) {
-            this.webSocket = new this.WebSocket(this.url, this.protocol);
+            var opts = this.handshakeTimeout ?
+                { handshakeTimeout: this.handshakeTimeout } :
+                undefined;
+            this.webSocket = new this.WebSocket(this.url, this.protocol, opts);
             this.webSocket.on(WebSocketEvent.open, ()=>{ this.open(); });
             this.webSocket.on(WebSocketEvent.close, ()=>{ this.close(); });
             this.webSocket.on(WebSocketEvent.message, (message)=>{ this.message(message); });
@@ -109,7 +121,12 @@ class Client {
     }
 
     close(options) {
+        // When the connection finishes closing the onClose event handler
+        // will re-trigger this clean up.
+        if (this.isClosing()) { return; }
+
         let connect = _.get(options, 'connect', false);
+
         let closeHandler = ()=>{
             this.stopConnectionTimeout();
             if(this.webSocket !== null) {
@@ -127,11 +144,10 @@ class Client {
                 this.connect();
             }
         };
-        if(_.isObject(this.webSocket) && this.isConnected()) {
+
+        if(this.isConnected() || this.isConnecting()) {
             this.webSocket.removeAllListeners('close');
-            this.webSocket.on('close', ()=>{
-                closeHandler();
-            });
+            this.webSocket.on('close', () => closeHandler());
             this.webSocket.close();
         } else {
             closeHandler();
