@@ -12,5 +12,6 @@ Architecture: all
 Depends:
  ${misc:Depends},
  ${perl:Depends},
-Description: javascript library to implement the websocket
-  interface towards the janus server
+Description: javascript websocket client interface for janus server
+ This package provides a javascript websocket client interface to communicate
+ with a janus server.
