@@ -1,3 +1,23 @@
+janus-client (5.0.0.0+0~mr8.0.1.0) unstable; urgency=medium
+
+  [ Alexander Lutay ]
+  * [3a48d85] TT#63760 Fix f195b585c: user package-lock.json instead of removed npm-shrinkwrap.json
+
+  [ Hans-Peter Herzog ]
+  * [e514e7b] TT#64704 Force npm cli to download packages from sipwise npm mirror
+  * [b5ea5b4] TT#66595 Fix type issue with Janus video room id
+  * [9c37592] TT#67168 Fix unhandled promise rejection in session timeout handling
+
+  [ Rob Gonnella ]
+  * [a41e866] TT#66572 Prevent uncaught rejections on websocket timeout #19
+
+  [ Kyle Foley ]
+  * [359b5c1] TT#66574 Added listener for full-trickle support #15
+
+  [ Sipwise Jenkins Builder ]
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Tue, 08 Oct 2019 09:07:19 +0200
+
 janus-client (5.0.0.0+0~mr8.0.0.0) unstable; urgency=medium
 
   [ Alexander Lutay ]
