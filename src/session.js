@@ -44,11 +44,12 @@ class Session {
                 this.state = State.alive;
                 this.emitter.emit('keepalive', true);
             }).catch(()=>{
-                this.keepAliveFailCount++;
+                this.keepAliveFailCount = this.keepAliveFailCount + 1;
                 this.state = State.dying;
                 this.emitter.emit('keepalive', false);
-                if(this.keepAliveFailCount === this.keepAliveFails) {
+                if(this.keepAliveFailCount >= this.keepAliveFails) {
                     this.state = State.dead;
+                    this.stopKeepAlive();
                     this.timeout();
                 }
             });
@@ -134,16 +135,14 @@ class Session {
         }
     }
 
-    destroy() {
-        return new Promise((resolve, reject)=>{
-            this.stopKeepAlive();
-            this.janus.destroySession(this.getId()).then(()=>{
-                this.janus = null;
-                resolve();
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
+    async destroy() {
+        this.stopKeepAlive();
+        try {
+            await this.janus.destroySession(this.getId());
+        } catch(err) {
+            logger.debug(err);
+            logger.warn('Could not destroy remote session')
+        }
     }
 
     videoRoom() {
@@ -151,5 +150,7 @@ class Session {
     }
 }
 
-module.exports.Session = Session;
-module.exports.SessionState = State;
+module.exports = {
+    Session,
+    State
+};
