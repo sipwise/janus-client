@@ -104,7 +104,7 @@ client.createSession().then((session)=>{
 ```javascript
 videoRoomHandle.create({
    publishers: 3,
-   is_private: 'no',
+   is_private: false,
    secret: '****',
    pin: '****',
    audiocodec: 'opus',
