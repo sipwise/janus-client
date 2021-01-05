@@ -1,3 +1,9 @@
+janus-client (5.0.0.0+0~mr9.3.0.0) unstable; urgency=medium
+
+  * New release.
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Tue, 05 Jan 2021 15:30:51 +0100
+
 janus-client (5.0.0.0+0~mr9.2.0.0) unstable; urgency=medium
 
   * New release.
