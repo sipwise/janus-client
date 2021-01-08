@@ -116,6 +116,16 @@ videoRoomHandle.create({
 });
 ```
 
+## Delete a videoroom
+
+```javascript
+videoRoomHandle.destroy({
+   room: roomId
+}).then((result)=>{
+  ...
+});
+```
+
 ## Publish media stream
 
 ```javascript
