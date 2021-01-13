@@ -121,7 +121,9 @@ videoRoomHandle.create({
 ```javascript
 videoRoomHandle.destroy({
    room: roomId
-}).then((result)=>{
+}).then((result) => {
+  ...
+}).catch((err) => {
   ...
 });
 ```
