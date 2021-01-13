@@ -116,6 +116,16 @@ videoRoomHandle.create({
 });
 ```
 
+## Delete a videoroom
+
+```javascript
+videoRoomHandle.destroy({
+   room: roomId
+}).then((result)=>{
+  ...
+});
+```
+
 ## Publish media stream
 
 ```javascript
@@ -166,7 +176,6 @@ session.videoRoom().getFeeds(room).then((feeds)=>{
 ## Run tests
 
     npm test
-
 
 
 
