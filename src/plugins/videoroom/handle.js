@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const assert = require('chai').assert;
 const PluginHandle = require('../handle').PluginHandle;
-const logger = require('debug-logger')('janus:videoroom:handle');
 
 const ParticipantType = {
     publisher: 'publisher',
