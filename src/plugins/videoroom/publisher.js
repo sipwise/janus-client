@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const logger = require('debug-logger')('janus:videoroom:publisher');
 const VideoRoomHandle = require('./handle').VideoRoomHandle;
-
+const { parseRoom } = require('./utils');
 /**
  * @class
  */
@@ -12,7 +12,7 @@ class VideoRoomPublisher extends VideoRoomHandle {
     constructor(options) {
         super(options);
         this.publisherId = null;
-        this.room = options.room;
+        this.room = parseRoom(options.room, this.allowStringIds);
         this.answer = null;
     }
 

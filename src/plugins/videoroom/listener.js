@@ -2,6 +2,7 @@
 
 const logger = require('debug-logger')('janus:videoroom:listener');
 const VideoRoomHandle = require('./handle').VideoRoomHandle;
+const { parseRoom } = require('./utils');
 
 /**
  * @class
@@ -10,7 +11,7 @@ class VideoRoomListener extends VideoRoomHandle {
 
     constructor(options) {
         super(options);
-        this.room = options.room;
+        this.room = parseRoom(options.room, this.allowStringIds);
         this.feed = options.feed;
         this.offer = null;
     }

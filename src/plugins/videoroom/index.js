@@ -28,6 +28,7 @@ class VideoRoomPlugin extends Plugin {
         this.name = 'videoroom';
         this.fullName = 'janus.plugin.' + this.name;
         this.session = options.session;
+        this.allowStringIds = options.allowStringIds;
         this.$defaultHandle = null;
     }
 

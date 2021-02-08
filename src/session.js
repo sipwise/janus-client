@@ -26,7 +26,10 @@ class Session {
         this.emitter = new EventEmitter();
         this.state = (this.janus.isConnected()) ? State.alive : State.dead;
         this.startKeepAlive();
-        this.videoRoomPlugin = new VideoRoomPlugin({ session: this });
+        this.videoRoomPlugin = new VideoRoomPlugin({ 
+            session: this,
+            allowStringIds: janus.allowStringIds,
+        });
     }
 
     keepAlive() {
