@@ -1,3 +1,18 @@
+janus-client (5.0.0.0+0~mr9.4.0.0) unstable; urgency=medium
+
+  [ spartanz51 ]
+  * [2cf9284] TT#107700 fix README: is_private is bool
+
+  [ Hans-Peter Herzog ]
+  * [a3787db] TT#107203 Fix dependencies vulnerabilities
+  * [05ded37] TT#107203 Remove unnecessary import
+  * [0dcb74d] TT#107204 Document how to delete a video room
+
+  [ pleymor ]
+  * [ad33b3f] TT#107204 Document how to delete a video room
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Mon, 15 Feb 2021 17:51:59 +0100
+
 janus-client (5.0.0.0+0~mr9.3.0.0) unstable; urgency=medium
 
   * New release.
