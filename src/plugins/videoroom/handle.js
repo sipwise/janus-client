@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const assert = require('chai').assert;
 const PluginHandle = require('../handle').PluginHandle;
+const { parseRoom } = require('./utils');
 
 const ParticipantType = {
     publisher: 'publisher',
@@ -16,6 +17,8 @@ class VideoRoomHandle extends PluginHandle {
 
     constructor(options) {
         super(options);
+
+        this.allowStringIds = options.plugin.allowStringIds;
     }
 
     create(options) {
@@ -38,7 +41,7 @@ class VideoRoomHandle extends PluginHandle {
     destroy(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             let message = _.merge({
                 request: 'destroy'
             }, options);
@@ -55,7 +58,7 @@ class VideoRoomHandle extends PluginHandle {
     exists(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             let message = _.merge({
                 request: 'exists'
             }, options);
@@ -88,7 +91,7 @@ class VideoRoomHandle extends PluginHandle {
     listParticipants(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             let message = _.merge({
                 request: 'listparticipants'
             }, options);
@@ -107,7 +110,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
             assert.property(options, 'ptype');
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             let message = _.merge({
                 request: 'join'
             }, options);
@@ -128,7 +131,7 @@ class VideoRoomHandle extends PluginHandle {
     joinPublisher(options) {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             let joinOptions = _.merge({
                 ptype: ParticipantType.publisher
             }, options);
@@ -146,7 +149,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
             assert.property(options, 'feed');
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             options.feed = parseInt(options.feed + "");
             let joinOptions = _.merge({
                 ptype: ParticipantType.listener
@@ -188,7 +191,7 @@ class VideoRoomHandle extends PluginHandle {
             options.audio = _.get(options, 'audio', true);
             options.video = _.get(options, 'video', true);
             options.data = _.get(options, 'data', true);
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             let message = _.merge({
                 request: 'joinandconfigure',
                 ptype: 'publisher'
@@ -247,7 +250,7 @@ class VideoRoomHandle extends PluginHandle {
         return new Promise((resolve, reject)=>{
             assert.property(options, 'room');
             assert.property(options, 'jsep');
-            options.room = parseInt(options.room + "");
+            options.room = parseRoom(options.room + "", this.allowStringIds);
             let message = _.merge({
                 request: 'start'
             }, options);

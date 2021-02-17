@@ -72,6 +72,7 @@ class Client {
         this.token = _.get(options, 'token', null);
         this.apiSecret = _.get(options, 'apiSecret', null);
         this.handshakeTimeout = _.get(options, 'handshakeTimeout', undefined);
+        this.allowStringIds = _.isBoolean(options.allowStringIds)? options.allowStringIds : false;
     }
 
     getVersion() {

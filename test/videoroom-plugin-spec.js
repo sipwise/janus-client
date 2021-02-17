@@ -33,6 +33,15 @@ describe('VideoRoomPlugin', function(){
         });
     });
 
+    it('should return feeds of a room as string', function(done) {
+        session.videoRoom().getFeeds('echo-1234').then((feeds)=>{
+            assert.isArray(feeds);
+            done();
+        }).catch((err)=>{
+            done(err);
+        });
+    });
+
     it('should return feeds of a room excluding a specific feed', function(done) {
         session.videoRoom().getFeedsExclude(1, 1).then((feeds)=>{
             console.log(feeds);
