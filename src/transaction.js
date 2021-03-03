@@ -1,6 +1,5 @@
 'use strict';
 
-const path = require('path');
 const _ = require('lodash');
 const createId = require('uuid');
 const EventEmitter = require('events').EventEmitter;

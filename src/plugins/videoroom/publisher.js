@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const logger = require('debug-logger')('janus:videoroom:publisher');
 const VideoRoomHandle = require('./handle').VideoRoomHandle;
 
 /**

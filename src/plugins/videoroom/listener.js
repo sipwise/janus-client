@@ -1,6 +1,5 @@
 'use strict';
 
-const logger = require('debug-logger')('janus:videoroom:listener');
 const VideoRoomHandle = require('./handle').VideoRoomHandle;
 
 /**

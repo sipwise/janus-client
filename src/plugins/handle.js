@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const EventEmitter = require('events').EventEmitter;
 const JanusEvents = require('../constants').JanusEvents;
-const logger = require('debug-logger')('janus:handle');
 const PluginError = require('../errors').PluginError;
 const PluginResponse = require('../client/response').PluginResponse;
 
