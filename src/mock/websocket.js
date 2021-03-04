@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const EventEmitter = require('events').EventEmitter;
 const JanusResponse = require('../mock/janus-response');
 
 const Plugins = {
@@ -14,7 +13,6 @@ class WebSocketMock {
         this.url = url;
         this.protocol = protocol;
         this.readyState = 0;
-        this.events = new EventEmitter();
         this.open();
         this.delay = 10;
 
@@ -40,7 +38,6 @@ class WebSocketMock {
     }
 
     send(message, cb) {
-        console.log(message);
         let parsedMessage = message;
         if(_.isString(message)) {
             parsedMessage = JSON.parse(message);
@@ -56,10 +53,10 @@ class WebSocketMock {
     dispatchMessage(parsedMessage) {
         switch(parsedMessage.janus) {
             case 'info':
-                this.emit('message', JanusResponse.general.info(parsedMessage));
+                this.emitMessage(JanusResponse.general.info(parsedMessage));
                 break;
             case 'create':
-                this.emit('message', JanusResponse.session.create(parsedMessage));
+                this.emitMessage(JanusResponse.session.create(parsedMessage));
                 break;
             case 'attach':
                 this.attachHandle(parsedMessage);
@@ -75,7 +72,7 @@ class WebSocketMock {
             case Plugins.janus_plugin_videoroom:
                 this.handleCounter++;
                 this.handles.set(this.handleCounter, Plugins.janus_plugin_videoroom);
-                this.emit('message', JanusResponse.session.createVideoRoomHandle(parsedMessage, this.handleCounter));
+                this.emitMessage(JanusResponse.session.createVideoRoomHandle(parsedMessage, this.handleCounter));
                 break;
         }
     }
@@ -86,24 +83,33 @@ class WebSocketMock {
             case Plugins.janus_plugin_videoroom:
                 switch(parsedMessage.body.request) {
                     case 'listparticipants':
-                        this.emit('message', JanusResponse.videoRoomHandle.listParticipants(
-                            parsedMessage, this.handleCounter));
+                        this.emitMessage(JanusResponse.videoRoomHandle.listParticipants(
+                          parsedMessage, this.handleCounter));
                         break;
                 }
                 break;
         }
     }
 
-    emit() {
-        this.events.emit.apply(this.events, arguments);
+    emitMessage(message) {
+        this.emit('message', {
+            data: message
+        });
     }
 
-    on(name, listener) {
-        this.events.on(name, listener);
+    emit() {
+        let newArgs = _.drop(arguments, 1);
+        const event = arguments[0] && `on${arguments[0]}`;
+
+        if (this.hasOwnProperty(event) && _.isFunction(this[event])) {
+            this[event].apply(this, newArgs);
+        }
     }
 
     removeAllListeners(name) {
-        this.events.removeAllListeners(name);
+        if (this.hasOwnProperty(name)) {
+            this.delete(name);
+        }
     }
 }
 

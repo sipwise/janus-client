@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const WebSocket = require('ws');
+const WebSocket = require('isomorphic-ws');
 const EventEmitter = require('events').EventEmitter;
 const Transaction = require('../transaction').Transaction;
 const logger = require('debug-logger')('janus:client');
@@ -95,11 +95,12 @@ class Client {
             var opts = this.handshakeTimeout ?
                 { handshakeTimeout: this.handshakeTimeout } :
                 undefined;
+
             this.webSocket = new this.WebSocket(this.url, this.protocol, opts);
-            this.webSocket.on(WebSocketEvent.open, ()=>{ this.open(); });
-            this.webSocket.on(WebSocketEvent.close, ()=>{ this.close(); });
-            this.webSocket.on(WebSocketEvent.message, (message)=>{ this.message(message); });
-            this.webSocket.on(WebSocketEvent.error, (err)=>{ this.error(err); });
+            this.webSocket.onopen = ()=>{ this.open(); };
+            this.webSocket.onclose = ()=>{ this.close(); };
+            this.webSocket.onmessage = (message)=>{ this.message(message); };
+            this.webSocket.onerror = (err)=>{ this.error(err); };
             this.startConnectionTimeout();
         }
     }
@@ -130,10 +131,10 @@ class Client {
         let closeHandler = ()=>{
             this.stopConnectionTimeout();
             if(this.webSocket !== null) {
-                this.webSocket.removeAllListeners(WebSocketEvent.open);
-                this.webSocket.removeAllListeners(WebSocketEvent.message);
-                this.webSocket.removeAllListeners(WebSocketEvent.error);
-                this.webSocket.removeAllListeners(WebSocketEvent.close);
+                this.webSocket.onopen = null;
+                this.webSocket.onclose = null;
+                this.webSocket.onmessage = null;
+                this.webSocket.onerror = null;
                 this.webSocket = null;
             }
             if(this.lastConnectionEvent === ClientEvent.connected) {
@@ -146,8 +147,12 @@ class Client {
         };
 
         if(this.isConnected() || this.isConnecting()) {
-            this.webSocket.removeAllListeners('close');
-            this.webSocket.on('close', () => closeHandler());
+            if (typeof this.webSocket.removeAllListeners === "function") {
+                this.webSocket.removeAllListeners('close');
+            } else {
+                this.webSocket.onclose = null;
+            }
+            this.webSocket.onclose = () => closeHandler();
             this.webSocket.close();
         } else {
             closeHandler();
@@ -156,10 +161,10 @@ class Client {
 
     message(message) {
         this.startConnectionTimeout();
-        let parsedMessage = message;
+        let parsedMessage = message.data;
         try {
-            if(_.isString(message)) {
-                parsedMessage = JSON.parse(message);
+            if(_.isString(message.data)) {
+                parsedMessage = JSON.parse(message.data);
             }
             this.logger.debug('Received message', parsedMessage);
             this.dispatchObject(parsedMessage);
@@ -233,16 +238,10 @@ class Client {
         return new Promise((resolve, reject)=>{
             assert.isObject(obj);
             if(this.isConnected()) {
-                this.webSocket.send(JSON.stringify(obj), (err)=> {
-                    if (_.isObject(err)) {
-                        reject(err);
-                    } else {
-                        this.logger.debug('Sent message', obj);
-                        resolve();
-                    }
-                });
+                this.webSocket.send(JSON.stringify(obj));
+                resolve();
             } else {
-                throw new ConnectionStateError(this);
+                reject(new ConnectionStateError(this));
             }
         });
     }
