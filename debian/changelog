@@ -1,3 +1,17 @@
+janus-client (5.0.0.0+0~mr9.5.0.0) unstable; urgency=medium
+
+  [ Brian Wilson ]
+  * [cf587da] TT#113752 Integrate PR #18
+
+  [ Guillem Jover ]
+  * [4db2e3a] TT#111150 Remove unused requires
+
+  [ Manuel Montecelo ]
+  * [e85f32f] TT#113853 Preparations for release mr8.5.4, npm not working
+  * [9893c5c] TT#113853 Preparations for release mr8.5.4, missing "mocha" binary
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Tue, 20 Apr 2021 11:56:54 +0200
+
 janus-client (5.0.0.0+0~mr9.4.0.0) unstable; urgency=medium
 
   [ spartanz51 ]
