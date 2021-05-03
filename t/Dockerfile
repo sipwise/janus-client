@@ -1,11 +1,11 @@
-# DOCKER_NAME=janus-client-buster
-FROM docker.mgm.sipwise.com/sipwise-buster:latest
+# DOCKER_NAME=janus-client-bullseye
+FROM docker.mgm.sipwise.com/sipwise-bullseye:latest
 
 # Important! Update this no-op ENV variable when this Dockerfile
 # is updated with the current date. It will force refresh of all
 # of the base images and things like `apt-get update` won't be using
 # old cached versions when the Dockerfile is built.
-ENV REFRESHED_AT 2021-04-06
+ENV REFRESHED_AT 2021-05-03
 
 # files that get-code generates
 COPY t/sources.list.d/builddeps.list /etc/apt/sources.list.d/
@@ -36,17 +36,17 @@ WORKDIR /code
 #
 # you need to put the proper NGCP sources at t/sources.list.d/builddeps.list
 # for instance, trunk:
-# echo "deb https://deb.sipwise.com/autobuild/ release-trunk-buster main" > t/sources.list.d/builddeps.list
+# echo "deb https://deb.sipwise.com/autobuild/ release-trunk-bullseye main" > t/sources.list.d/builddeps.list
 #
 # NOTE: run the following command from root folder of git repository:
-# % docker build --tag="janus-client-buster" -f ./t/Dockerfile .
+# % docker build --tag="janus-client-bullseye" -f ./t/Dockerfile .
 # NOTE: run the following command from root folder of git repository:
-# % docker run --rm -i -t -v $(pwd):/code:ro -v /results janus-client-buster:latest bash
+# % docker run --rm -i -t -v $(pwd):/code:ro -v /results janus-client-bullseye:latest bash
 #
 # Use the existing docker image:
-# % docker pull docker.mgm.sipwise.com/janus-client-buster
+# % docker pull docker.mgm.sipwise.com/janus-client-bullseye
 # NOTE: run the following command from root folder of git repository:
-# % docker run --rm -i -t -v $(pwd):/code:ro -v /results docker.mgm.sipwise.com/janus-client-buster:latest bash
+# % docker run --rm -i -t -v $(pwd):/code:ro -v /results docker.mgm.sipwise.com/janus-client-bullseye:latest bash
 #
 # Inside docker:
 #   cd /code && ./t/testrunner
