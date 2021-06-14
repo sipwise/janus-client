@@ -22,7 +22,7 @@
     "lodash": "4.17.20",
     "uuid": "3.3.2",
     "validator": "11.1.0",
-    "ws": "7.1.1"
+    "ws": "7.4.6"
   },
   "devDependencies": {
     "mocha": "8.2.1"
