@@ -1,3 +1,10 @@
+janus-client (5.0.0.0+0~mr10.0.0.0) unstable; urgency=medium
+
+  [ Manuel Montecelo ]
+  * [8953875] TT#118659 Switch Dockerfile from Debian buster to bullseye
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Mon, 14 Jun 2021 16:35:17 +0200
+
 janus-client (5.0.0.0+0~mr9.5.0.0) unstable; urgency=medium
 
   [ Brian Wilson ]
