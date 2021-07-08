@@ -1,3 +1,10 @@
+janus-client (5.0.0.0+0~mr8.5.6.0) unstable; urgency=medium
+
+  [ Manuel Montecelo ]
+  * [c1c811e] TT#113853 Preparations for release mr8.5.4, missing "mocha" binary
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Thu, 08 Jul 2021 12:00:14 +0200
+
 janus-client (5.0.0.0+0~mr8.5.5.0) unstable; urgency=medium
 
   * New release.
