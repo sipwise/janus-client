@@ -1,3 +1,10 @@
+janus-client (5.0.0.0+0~mr6.5.13.2) unstable; urgency=medium
+
+  [ Manuel Montecelo ]
+  * [a1764af] TT#138660 Fix to build release mr6.5.13, Dockerfile
+
+ -- Sipwise Jenkins Builder <jenkins@sipwise.com>  Thu, 14 Oct 2021 00:17:09 +0200
+
 janus-client (5.0.0.0+0~mr6.5.13.1) unstable; urgency=medium
 
   * New release.
