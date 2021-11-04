@@ -2,9 +2,9 @@ Source: janus-client
 Section: admin
 Priority: optional
 Maintainer: Sipwise Development Team <support@sipwise.com>
-Standards-Version: 3.9.8
+Standards-Version: 4.5.1
 Build-Depends:
- debhelper-compat (= 12),
+ debhelper-compat (= 13),
 Homepage: https://www.sipwise.com/
 
 Package: ngcp-janus-client
