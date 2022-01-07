@@ -160,14 +160,16 @@ describe('Client', function() {
         var client = new Client({
             url: mockServerUrl
         });
-        client.sendObject(request).then(()=>{
+        try {
+            client.sendObject(request);
             done(new Error());
-        }).catch((err)=>{
+        }
+        catch (err) {
             assert.equal(client.isConnected(), false);
             assert.equal(client.getConnectionState(), ConnectionState.disconnected);
             assert.instanceOf(err, ConnectionStateError);
             done();
-        });
+        }
     });
 
     it('should send an object', function(done){
@@ -175,11 +177,13 @@ describe('Client', function() {
             url: mockServerUrl
         });
         client.onConnected(()=>{
-            client.sendObject(request).then(()=>{
+            try {
+                client.sendObject(request);
                 done();
-            }).catch((err)=>{
+            }
+            catch (err) {
                 done(err);
-            });
+            };
         });
         client.connect();
     });
