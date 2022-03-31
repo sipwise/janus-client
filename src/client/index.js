@@ -235,15 +235,12 @@ class Client {
     }
 
     sendObject(obj) {
-        return new Promise((resolve, reject)=>{
-            assert.isObject(obj);
-            if(this.isConnected()) {
-                this.webSocket.send(JSON.stringify(obj));
-                resolve();
-            } else {
-                reject(new ConnectionStateError(this));
-            }
-        });
+        assert.isObject(obj);
+        if(this.isConnected()) {
+            this.webSocket.send(JSON.stringify(obj));
+        } else {
+            throw new ConnectionStateError(this);
+        }
     }
 
     createTransaction(options) {
